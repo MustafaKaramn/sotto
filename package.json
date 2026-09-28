@@ -1,0 +1,27 @@
+{
+  "name": "sotto",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Per-tab volume control for Chromium browsers: volume, boost, mono, and a clean release.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "icons": "node scripts/build-icons.mjs",
+    "pack": "node scripts/pack.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc -p jsconfig.json",
+    "format": "prettier --write .",
+    "check": "eslint . && tsc -p jsconfig.json && prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/chrome": "^0.3.0",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,89 @@
+<p align="center">
+  <img src="src/icons/icon-128.png" width="96" height="96" alt="" />
+</p>
+
+<h1 align="center">Sotto</h1>
+
+<p align="center">Per-tab volume control for Chromium browsers. Small, clean, and it lets go when you're done.</p>
+
+---
+
+## Features
+
+- **Volume slider per tab**: 0–300%. Anything above 100% is boost and the slider shows it in a different color. Drags snap to 100%, and the mouse wheel moves it in steps of 5.
+- **Mono**: plays both channels in both ears. Useful for videos whose sound comes from one side only.
+- **Reset**: back to 100%, stereo.
+- **Release**: stops controlling the tab completely. The capture ends, Chrome's "sharing this tab" indicator goes away, and the tab plays exactly as it did before.
+- **All controlled tabs in one place**: every tab Sotto is controlling appears in the popup, with its own slider.
+- **English and Turkish** UI; it follows the browser language.
+
+## Principles
+
+- **Touches nothing until you ask it to.** Opening the popup does nothing to the tab. Sotto only takes control once you move a control.
+- **Leaves nothing behind.** Releasing the last tab closes the audio engine entirely. An idle Sotto has no running page and no background work.
+- **No data, no network.** No analytics, no remote code, no storage. See [PRIVACY.md](PRIVACY.md).
+- **No framework, no build step.** Plain JavaScript modules with JSDoc types. The whole extension is about 15 KB zipped.
+
+## How it works
+
+```
+popup ──► service worker ──► offscreen document (audio engine)
+            │                   tab stream → gain (volume) → mixer (stereo | mono) → speakers
+            └─ chrome.tabCapture.getMediaStreamId
+```
+
+- [`src/popup/`](src/popup): the UI. Updates are optimistic and coalesced, so fast slider drags send at most one request per tab at a time.
+- [`src/background/service-worker.js`](src/background/service-worker.js): the coordinator. It captures tabs, creates the offscreen document on demand, closes it when nothing is controlled, and sets the toolbar badge.
+- [`src/offscreen/`](src/offscreen): the audio engine. One Web Audio graph per tab on a shared `AudioContext`.
+- [`src/shared/protocol.js`](src/shared/protocol.js): message types, shared constants and messaging helpers.
+
+Sotto uses `chrome.tabCapture` because it is the only approach that handles **all** audio in a tab: `<video>`, Web Audio, cross-origin iframes. It also allows boost and mono. The trade-off is that Chrome shows its tab-sharing indicator **while a tab is being controlled**. Chrome shows that indicator for every tab capture as a security measure, and extensions can't hide it. What Sotto guarantees is that the indicator goes away the moment you press **Release**.
+
+## Browser support
+
+Sotto needs Chromium 116 or later: Chrome, Edge, Brave, Opera, Vivaldi and others. Firefox is not supported, because it has no `tabCapture` or offscreen documents.
+
+## Development
+
+Requirements: Node.js 22+.
+
+```sh
+npm install        # dev tooling only (ESLint, Prettier, TypeScript for JSDoc checks)
+```
+
+Load the extension:
+
+1. Open `chrome://extensions` (or `edge://extensions`) and turn on **Developer mode**.
+2. Click **Load unpacked** and select the `src/` folder.
+3. After you change code, click the reload icon on the extension card. Popup changes apply the next time you open the popup.
+
+To debug, right-click the popup and choose _Inspect_. The service worker and the offscreen document both have _Inspect views_ links on the extension card.
+
+| Script              | What it does                                                            |
+| ------------------- | ----------------------------------------------------------------------- |
+| `npm run check`     | Runs lint, type checks and the formatting check (run before committing) |
+| `npm run lint`      | Runs ESLint                                                             |
+| `npm run typecheck` | Type-checks the JSDoc-annotated JS with `tsc`                           |
+| `npm run format`    | Formats everything with Prettier                                        |
+| `npm run icons`     | Regenerates `src/icons/*.png` from code                                 |
+| `npm run pack`      | Builds `dist/sotto-<version>.zip` for store upload                      |
+
+The version lives in both `src/manifest.json` and `package.json`. `npm run pack` refuses to build if the two differ.
+
+## Permissions
+
+| Permission   | Why                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| `activeTab`  | Read the current tab's title and icon when you open the popup, and allow capturing it.   |
+| `tabCapture` | Capture the tab's audio so its volume and channels can be changed.                       |
+| `offscreen`  | Run the Web Audio engine in a hidden page. Manifest V3 service workers can't play audio. |
+
+Sotto doesn't request host permissions and doesn't inject scripts into pages.
+
+## Publishing
+
+See [docs/publishing.md](docs/publishing.md).
+
+## License
+
+[MIT](LICENSE)

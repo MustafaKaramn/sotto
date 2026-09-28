@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sotto</title>
+    <link rel="stylesheet" href="popup.css" />
+    <script type="module" src="popup.js"></script>
+  </head>
+  <body>
+    <main class="panel">
+      <header class="head">
+        <img class="favicon" id="tab-icon" alt="" width="16" height="16" hidden />
+        <p class="head__title" id="tab-title"></p>
+        <span class="status" id="status" data-state="idle"></span>
+      </header>
+
+      <section class="control" aria-labelledby="volume-label">
+        <h1 class="sr-only" id="volume-label" data-i18n="volume"></h1>
+        <p class="readout" id="readout">
+          <output id="volume-value" for="volume">100</output><span class="readout__unit">%</span>
+        </p>
+        <div class="slider-wrap">
+          <input class="slider" id="volume" type="range" aria-labelledby="volume-label" />
+        </div>
+        <div class="actions">
+          <button
+            class="btn"
+            id="mono"
+            type="button"
+            aria-pressed="false"
+            data-i18n-title="monoHint"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 15v-3a8 8 0 0 1 16 0v3" />
+              <rect x="3" y="14" width="4.5" height="6.5" rx="1.5" />
+              <rect x="16.5" y="14" width="4.5" height="6.5" rx="1.5" />
+            </svg>
+            <span data-i18n="mono"></span>
+          </button>
+          <button class="btn" id="reset" type="button" data-i18n-title="resetHint">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1" />
+              <path d="M3.5 4v5h5" />
+            </svg>
+            <span data-i18n="reset"></span>
+          </button>
+          <button class="btn" id="release" type="button" data-i18n-title="releaseHint">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v8" />
+              <path d="M6.3 7.3a8 8 0 1 0 11.4 0" />
+            </svg>
+            <span data-i18n="release"></span>
+          </button>
+        </div>
+      </section>
+
+      <p class="notice" id="notice" role="status" hidden></p>
+
+      <section class="others" id="others" hidden>
+        <h2 class="others__title" data-i18n="otherTabs"></h2>
+        <ul class="others__list" id="other-list"></ul>
+      </section>
+    </main>
+
+    <template id="other-row">
+      <li class="row">
+        <button class="row__tab" type="button" data-i18n-title="goToTab">
+          <img class="favicon" alt="" width="16" height="16" hidden />
+          <span class="row__title"></span>
+        </button>
+        <span class="row__value"></span>
+        <button
+          class="icon-btn"
+          type="button"
+          data-i18n-title="releaseTab"
+          data-i18n-label="releaseTab"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>
+        </button>
+        <div class="slider-wrap row__slider">
+          <input class="slider slider--mini" type="range" />
+        </div>
+      </li>
+    </template>
+  </body>
+</html>

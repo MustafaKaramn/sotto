@@ -1,0 +1,53 @@
+{
+  "extName": {
+    "message": "Sotto – Sekme Ses Kontrolü"
+  },
+  "extDescription": {
+    "message": "Sekme başına ses kontrolü: yükseltme ve mono ses. Hafif, açık kaynak; işin bitince sekmeyi tamamen serbest bırakır."
+  },
+  "actionTitle": {
+    "message": "Sotto: sekme sesi"
+  },
+  "volume": {
+    "message": "Ses düzeyi"
+  },
+  "statusIdle": {
+    "message": "Dokunulmadı"
+  },
+  "statusActive": {
+    "message": "Kontrolde"
+  },
+  "mono": {
+    "message": "Mono"
+  },
+  "monoHint": {
+    "message": "Mono ses: iki kanalı da iki kulağa ver (tek taraflı sesi düzeltir)"
+  },
+  "reset": {
+    "message": "Sıfırla"
+  },
+  "resetHint": {
+    "message": "%100'e ve stereoya dön"
+  },
+  "release": {
+    "message": "Bırak"
+  },
+  "releaseHint": {
+    "message": "Bu sekmeyi kontrol etmeyi bırak, her şey eskisi gibi olsun"
+  },
+  "otherTabs": {
+    "message": "Kontrol edilen diğer sekmeler"
+  },
+  "goToTab": {
+    "message": "Sekmeye git"
+  },
+  "releaseTab": {
+    "message": "Bu sekmeyi bırak"
+  },
+  "noticeRestricted": {
+    "message": "Tarayıcı bu sayfada ses kontrolüne izin vermiyor."
+  },
+  "noticeFailed": {
+    "message": "Bu sekmenin kontrolü alınamadı. Sayfayı yenileyip tekrar deneyin."
+  }
+}

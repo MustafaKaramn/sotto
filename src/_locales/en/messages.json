@@ -1,0 +1,58 @@
+{
+  "extName": {
+    "message": "Sotto – Tab Volume Control",
+    "description": "Extension name shown in the browser and the store."
+  },
+  "extDescription": {
+    "message": "Per-tab volume with boost and mono audio. Light, open source, and it fully lets go of the tab when you're done.",
+    "description": "Short description, max 132 characters."
+  },
+  "actionTitle": {
+    "message": "Sotto: tab volume",
+    "description": "Tooltip of the toolbar button."
+  },
+  "volume": {
+    "message": "Volume"
+  },
+  "statusIdle": {
+    "message": "Untouched",
+    "description": "The extension is not doing anything to this tab."
+  },
+  "statusActive": {
+    "message": "Controlling",
+    "description": "The extension is processing this tab's audio."
+  },
+  "mono": {
+    "message": "Mono"
+  },
+  "monoHint": {
+    "message": "Mono audio: play both channels in both ears (fixes one-sided sound)"
+  },
+  "reset": {
+    "message": "Reset"
+  },
+  "resetHint": {
+    "message": "Back to 100%, stereo"
+  },
+  "release": {
+    "message": "Release"
+  },
+  "releaseHint": {
+    "message": "Stop controlling this tab and leave it exactly as it was"
+  },
+  "otherTabs": {
+    "message": "Other controlled tabs"
+  },
+  "goToTab": {
+    "message": "Go to tab"
+  },
+  "releaseTab": {
+    "message": "Release this tab"
+  },
+  "noticeRestricted": {
+    "message": "The browser doesn't allow controlling audio on this page."
+  },
+  "noticeFailed": {
+    "message": "Couldn't take control of this tab. Reload the page and try again."
+  }
+}

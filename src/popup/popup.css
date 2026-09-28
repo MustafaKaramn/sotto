@@ -1,0 +1,388 @@
+:root {
+  color-scheme: light dark;
+
+  --bg: #ffffff;
+  --surface: #f5f5f8;
+  --line: #e3e3ea;
+  --text: #1c1c21;
+  --muted: #6c6c78;
+  --accent: #5b5bd6;
+  --accent-soft: #ececfc;
+  --boost: #e5701d;
+  --track: #e2e2e9;
+  --thumb: #ffffff;
+
+  --radius: 10px;
+  /* Where 100% sits on the slider, as a 0..1 ratio. Set from JS. */
+  --unity: 0.3333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #19191d;
+    --surface: #222227;
+    --line: #313138;
+    --text: #ececf1;
+    --muted: #9c9ca8;
+    --accent: #8080f2;
+    --accent-soft: #2a2a4d;
+    --boost: #f5913e;
+    --track: #36363e;
+    --thumb: #f4f4f7;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 300px;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    13px/1.4 system-ui,
+    'Segoe UI',
+    sans-serif;
+}
+
+svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px 16px;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.favicon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.head__title {
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.status {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.status[data-state='active']::before {
+  background: var(--accent);
+}
+
+/* Main control ------------------------------------------------------------ */
+
+.control {
+  display: grid;
+  gap: 10px;
+}
+
+.control:has(.slider:disabled) {
+  opacity: 0.5;
+}
+
+.readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout output {
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color 0.15s;
+}
+
+.readout[data-boost] output {
+  color: var(--boost);
+}
+
+.readout__unit {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* Slider ------------------------------------------------------------------ */
+
+.slider-wrap {
+  --thumb-size: 18px;
+  --track-size: 6px;
+  /* Thumb centre for a 0..1 ratio, so the fill and the 100% tick line up with it. */
+  --unity-x: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * var(--unity));
+
+  position: relative;
+}
+
+.slider-wrap::after {
+  content: '';
+  position: absolute;
+  left: var(--unity-x);
+  bottom: -2px;
+  width: 2px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--muted);
+  opacity: 0.5;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.slider {
+  --fill: 0.3333;
+  --fill-x: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * var(--fill));
+
+  display: block;
+  width: 100%;
+  height: calc(var(--thumb-size) + 8px);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.slider:disabled {
+  cursor: default;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: var(--track-size);
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0 min(var(--fill-x), var(--unity-x)),
+    var(--boost) min(var(--fill-x), var(--unity-x)) var(--fill-x),
+    var(--track) var(--fill-x)
+  );
+}
+
+.slider::-webkit-slider-thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  margin-top: calc((var(--track-size) - var(--thumb-size)) / 2);
+  border-radius: 50%;
+  background: var(--thumb);
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.3),
+    0 0 0 1px rgb(0 0 0 / 0.06);
+  transition: transform 0.1s;
+  appearance: none;
+}
+
+.slider:active::-webkit-slider-thumb {
+  transform: scale(1.1);
+}
+
+.slider:focus-visible {
+  outline: none;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 3px var(--bg),
+    0 0 0 5px var(--accent);
+}
+
+.slider-wrap:has(.slider--mini) {
+  --thumb-size: 14px;
+  --track-size: 4px;
+}
+
+/* Buttons ----------------------------------------------------------------- */
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.btn[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.row__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Notice ------------------------------------------------------------------ */
+
+.notice {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Other controlled tabs --------------------------------------------------- */
+
+.others {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.others__title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.others__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: 6px;
+}
+
+.row__tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.row__tab:hover .row__title {
+  text-decoration: underline;
+}
+
+.row__value {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.row__slider {
+  grid-column: 1 / -1;
+}
