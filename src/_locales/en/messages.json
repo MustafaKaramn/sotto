@@ -60,5 +60,23 @@
   },
   "noticeFailed": {
     "message": "Couldn't take control of this tab. Reload the page and try again."
+  },
+  "shortcuts": {
+    "message": "Keyboard shortcuts"
+  },
+  "commandVolumeUp": {
+    "message": "Volume up (10%)"
+  },
+  "commandVolumeDown": {
+    "message": "Volume down (10%)"
+  },
+  "commandMono": {
+    "message": "Toggle mono"
+  },
+  "commandReset": {
+    "message": "Reset to 100%, stereo"
+  },
+  "commandRelease": {
+    "message": "Release the tab"
   }
 }

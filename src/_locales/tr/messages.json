@@ -55,5 +55,23 @@
   },
   "noticeFailed": {
     "message": "Bu sekmenin kontrolü alınamadı. Sayfayı yenileyip tekrar deneyin."
+  },
+  "shortcuts": {
+    "message": "Klavye kısayolları"
+  },
+  "commandVolumeUp": {
+    "message": "Sesi artır (%10)"
+  },
+  "commandVolumeDown": {
+    "message": "Sesi azalt (%10)"
+  },
+  "commandMono": {
+    "message": "Mono aç/kapat"
+  },
+  "commandReset": {
+    "message": "%100'e ve stereoya dön"
+  },
+  "commandRelease": {
+    "message": "Sekmeyi bırak"
   }
 }

@@ -35,6 +35,25 @@ export const Volume = Object.freeze({
 export const DEFAULT_SETTINGS = Object.freeze({ volume: Volume.DEFAULT, mono: false });
 
 /**
+ * Copies just the settings out of a larger object, such as a ControlledTab.
+ * @param {Settings} source
+ * @returns {Settings}
+ */
+export function toSettings(source) {
+  return { volume: source.volume, mono: source.mono };
+}
+
+/** @param {Settings} settings */
+export function isDefault(settings) {
+  return settings.volume === DEFAULT_SETTINGS.volume && settings.mono === DEFAULT_SETTINGS.mono;
+}
+
+/** @param {number} volume */
+export function clampVolume(volume) {
+  return Math.min(Volume.MAX, Math.max(Volume.MIN, volume));
+}
+
+/**
  * @typedef {object} Settings
  * @property {number} volume Percent, `Volume.MIN`..`Volume.MAX`.
  * @property {boolean} mono Downmix to a single channel played in both ears.

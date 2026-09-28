@@ -24,5 +24,34 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "tabCapture", "offscreen"]
+  "permissions": ["activeTab", "tabCapture", "offscreen"],
+  "commands": {
+    "volume-up": {
+      "suggested_key": {
+        "default": "Alt+Shift+Up"
+      },
+      "description": "__MSG_commandVolumeUp__"
+    },
+    "volume-down": {
+      "suggested_key": {
+        "default": "Alt+Shift+Down"
+      },
+      "description": "__MSG_commandVolumeDown__"
+    },
+    "toggle-mono": {
+      "suggested_key": {
+        "default": "Alt+Shift+M"
+      },
+      "description": "__MSG_commandMono__"
+    },
+    "release": {
+      "suggested_key": {
+        "default": "Alt+Shift+0"
+      },
+      "description": "__MSG_commandRelease__"
+    },
+    "reset": {
+      "description": "__MSG_commandReset__"
+    }
+  }
 }

@@ -15,6 +15,7 @@
 - **Mono**: plays both channels in both ears. Useful for videos whose sound comes from one side only.
 - **Reset**: back to 100%, stereo.
 - **Release**: stops controlling the tab completely. The capture ends, Chrome's "sharing this tab" indicator goes away, and the tab plays exactly as it did before.
+- **Keyboard shortcuts** that work without opening the popup: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> change the volume by 10%, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> toggles mono, and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd> releases the tab. Reset has no default key but can be assigned. You can change all of them at `chrome://extensions/shortcuts`.
 - **All controlled tabs in one place**: every tab Sotto is controlling appears in the popup, with its own slider.
 - **English and Turkish** UI; it follows the browser language.
 

@@ -1,4 +1,13 @@
-import { DEFAULT_SETTINGS, Msg, Target, Volume, send } from '../shared/protocol.js';
+import {
+  DEFAULT_SETTINGS,
+  Msg,
+  Target,
+  Volume,
+  clampVolume,
+  isDefault,
+  send,
+  toSettings,
+} from '../shared/protocol.js';
 
 /**
  * @typedef {import('../shared/protocol.js').Settings} Settings
@@ -50,7 +59,7 @@ class TabController {
   constructor(tabId, settings, engaged, hooks) {
     this.tabId = tabId;
     /** @type {Settings} */
-    this.settings = { volume: settings.volume, mono: settings.mono };
+    this.settings = toSettings(settings);
     this.engaged = engaged;
     this.hooks = hooks;
   }
@@ -114,6 +123,7 @@ const ui = {
   reset: /** @type {HTMLButtonElement} */ (document.getElementById('reset')),
   release: /** @type {HTMLButtonElement} */ (document.getElementById('release')),
   notice: /** @type {HTMLElement} */ (document.getElementById('notice')),
+  shortcuts: /** @type {HTMLButtonElement} */ (document.getElementById('shortcuts')),
   others: /** @type {HTMLElement} */ (document.getElementById('others')),
   otherList: /** @type {HTMLUListElement} */ (document.getElementById('other-list')),
   rowTemplate: /** @type {HTMLTemplateElement} */ (document.getElementById('other-row')),
@@ -140,6 +150,32 @@ async function main() {
   setUpOtherTabs(tabs.filter((controlled) => controlled.tabId !== tab.id));
   showLimiting(limiting);
   setInterval(pollLimiter, LIMITER_POLL_MS);
+  await showShortcuts();
+}
+
+/** Adds the assigned keyboard shortcuts to the tooltips of what they control. */
+async function showShortcuts() {
+  const commands = await chrome.commands.getAll();
+  /** @param {string} name */
+  const key = (name) => commands.find((command) => command.name === name)?.shortcut;
+
+  /**
+   * @param {HTMLElement} element
+   * @param {(string | undefined)[]} keys
+   */
+  const hint = (element, keys) => {
+    const assigned = keys.filter(Boolean);
+    if (assigned.length) element.title = `${element.title} (${assigned.join(' / ')})`.trim();
+  };
+  hint(ui.volume, [key('volume-up'), key('volume-down')]);
+  hint(ui.mono, [key('toggle-mono')]);
+  hint(ui.reset, [key('reset')]);
+  hint(ui.release, [key('release')]);
+
+  ui.shortcuts.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
+    window.close();
+  });
 }
 
 async function pollLimiter() {
@@ -330,16 +366,6 @@ function positionToVolume(position) {
       : Volume.DEFAULT +
         ((position - UNITY_POSITION) / (1 - UNITY_POSITION)) * (Volume.MAX - Volume.DEFAULT);
   return Math.round(volume);
-}
-
-/** @param {number} volume */
-function clampVolume(volume) {
-  return Math.min(Volume.MAX, Math.max(Volume.MIN, volume));
-}
-
-/** @param {Settings} settings */
-function isDefault(settings) {
-  return settings.volume === DEFAULT_SETTINGS.volume && settings.mono === DEFAULT_SETTINGS.mono;
 }
 
 /**

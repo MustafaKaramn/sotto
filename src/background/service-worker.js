@@ -3,12 +3,25 @@
  * while at least one tab is controlled and is closed as soon as the last one
  * is released, so an idle Sotto costs nothing.
  */
-import { Msg, Target, listen, send } from '../shared/protocol.js';
+import {
+  DEFAULT_SETTINGS,
+  Msg,
+  Target,
+  clampVolume,
+  listen,
+  send,
+  toSettings,
+} from '../shared/protocol.js';
 
-/** @typedef {import('../shared/protocol.js').Settings} Settings */
+/**
+ * @typedef {import('../shared/protocol.js').Settings} Settings
+ * @typedef {import('../shared/protocol.js').ControlledTab} ControlledTab
+ */
 
 const OFFSCREEN_URL = 'offscreen/offscreen.html';
 const BADGE_COLOR = '#5b5bd6';
+/** Volume change per keyboard shortcut press, in percent. */
+const SHORTCUT_VOLUME_STEP = 10;
 
 /**
  * Captures in progress, so rapid slider input never captures a tab twice.
@@ -38,6 +51,43 @@ listen(Target.BACKGROUND, (message) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
   release(tabId).catch(() => {});
 });
+
+// A shortcut counts as invoking the extension on the active tab, like a click
+// on the toolbar button, so it may take control of the tab without the popup.
+chrome.commands.onCommand.addListener((command, tab) => {
+  if (tab?.id === undefined) return;
+  runCommand(command, tab.id).catch((error) => console.warn(`Sotto: "${command}" failed`, error));
+});
+
+/**
+ * @param {string} command A key of `commands` in the manifest.
+ * @param {number} tabId
+ */
+async function runCommand(command, tabId) {
+  /** @type {{ tabs: ControlledTab[] }} */
+  const { tabs } = await getState();
+  const controlled = tabs.find((tab) => tab.tabId === tabId);
+  const settings = controlled ? toSettings(controlled) : { ...DEFAULT_SETTINGS };
+
+  switch (command) {
+    case 'volume-up':
+      return update(tabId, {
+        ...settings,
+        volume: clampVolume(settings.volume + SHORTCUT_VOLUME_STEP),
+      });
+    case 'volume-down':
+      return update(tabId, {
+        ...settings,
+        volume: clampVolume(settings.volume - SHORTCUT_VOLUME_STEP),
+      });
+    case 'toggle-mono':
+      return update(tabId, { ...settings, mono: !settings.mono });
+    case 'reset':
+      return controlled && update(tabId, { ...DEFAULT_SETTINGS });
+    case 'release':
+      return release(tabId);
+  }
+}
 
 async function getState() {
   if (!(await hasOffscreenDocument())) return { tabs: [], limiting: false };
