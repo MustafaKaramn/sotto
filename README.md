@@ -65,15 +65,16 @@ Load the extension:
 
 To debug, right-click the popup and choose _Inspect_. The service worker and the offscreen document both have _Inspect views_ links on the extension card.
 
-| Script              | What it does                                                                       |
-| ------------------- | ---------------------------------------------------------------------------------- |
-| `npm run check`     | Runs lint, type checks, the formatting check and the tests (run before committing) |
-| `npm test`          | Runs the unit tests                                                                |
-| `npm run lint`      | Runs ESLint                                                                        |
-| `npm run typecheck` | Type-checks the JSDoc-annotated JS with `tsc`                                      |
-| `npm run format`    | Formats everything with Prettier                                                   |
-| `npm run icons`     | Regenerates `src/icons/*.png` from code                                            |
-| `npm run pack`      | Builds `dist/sotto-<version>.zip` for store upload                                 |
+| Script                 | What it does                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `npm run check`        | Runs lint, type checks, the formatting check and the tests (run before committing) |
+| `npm test`             | Runs the unit tests                                                                |
+| `npm run lint`         | Runs ESLint                                                                        |
+| `npm run typecheck`    | Type-checks the JSDoc-annotated JS with `tsc`                                      |
+| `npm run format`       | Formats everything with Prettier                                                   |
+| `npm run icons`        | Regenerates `src/icons/*.png` from code                                            |
+| `npm run store-assets` | Renders store screenshots and the promo tile into `store/images/`                  |
+| `npm run pack`         | Builds `dist/sotto-<version>.zip` for store upload                                 |
 
 The version lives in both `src/manifest.json` and `package.json`. `npm run pack` refuses to build if the two differ.
 

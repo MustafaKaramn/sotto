@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sotto store screenshot</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1280px;
+        height: 800px;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 64px;
+        padding: 0 104px;
+        background:
+          radial-gradient(760px 560px at 78% 42%, rgb(91 91 214 / 0.42), transparent 70%),
+          linear-gradient(160deg, #17172e, #0e0e1a);
+        color: #f2f2f8;
+        font-family: system-ui, 'Segoe UI', sans-serif;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 28px;
+        font-weight: 600;
+      }
+
+      .brand img {
+        width: 48px;
+        height: 48px;
+      }
+
+      h1 {
+        margin: 40px 0 20px;
+        font-size: 66px;
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+
+      p {
+        max-width: 500px;
+        margin: 0;
+        color: #b8b8d0;
+        font-size: 25px;
+        line-height: 1.45;
+      }
+
+      .frame {
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow:
+          0 30px 80px rgb(0 0 0 / 0.55),
+          0 0 0 1px rgb(255 255 255 / 0.09);
+        zoom: 1.55;
+      }
+
+      iframe {
+        display: block;
+        width: 300px;
+        height: 400px;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand"><img src="/src/icons/icon-128.png" alt="" />Sotto</div>
+      <h1 id="headline"></h1>
+      <p id="body"></p>
+    </main>
+    <div class="frame"><iframe id="popup" title="Sotto popup"></iframe></div>
+
+    <script>
+      const COPY = {
+        en: {
+          boost: [
+            'Louder, and still clean.',
+            'Boost any tab up to 500%. A built-in limiter stops the crackle before it starts.',
+          ],
+          tools: [
+            'Fix how it sounds.',
+            'Mono for one-sided audio, night mode for quiet dialogue, balance for uneven hearing.',
+          ],
+          release: [
+            "Gone when you're done.",
+            'Release a tab and it plays exactly as before. The sharing indicator disappears and nothing keeps running.',
+          ],
+        },
+        tr: {
+          boost: [
+            'Daha yüksek, yine de temiz.',
+            'Her sekmeyi %500’e kadar yükseltin. Dahili sınırlayıcı cızırtıyı başlamadan önler.',
+          ],
+          tools: [
+            'Sesi düzeltin.',
+            'Tek taraflı ses için mono, kısık diyalog için gece modu, işitme farkı için denge.',
+          ],
+          release: [
+            'İşiniz bitince iz bırakmaz.',
+            'Sekmeyi bırakın, eskisi gibi çalsın. Paylaşım göstergesi kaybolur, arka planda hiçbir şey çalışmaz.',
+          ],
+        },
+      };
+
+      const params = new URLSearchParams(location.search);
+      const lang = params.get('lang') ?? 'en';
+      const scene = params.get('scene') ?? 'boost';
+      const [headline, body] = COPY[lang][scene];
+      document.documentElement.lang = lang;
+      document.getElementById('headline').textContent = headline;
+      document.getElementById('body').textContent = body;
+
+      const popup = document.getElementById('popup');
+      popup.addEventListener('load', () => {
+        // Fit the frame to the popup once it has rendered its content.
+        setTimeout(() => {
+          popup.style.height = `${popup.contentDocument.body.offsetHeight}px`;
+        }, 200);
+      });
+      popup.src = `/preview/popup.html?scene=${scene}&lang=${lang}`;
+    </script>
+  </body>
+</html>

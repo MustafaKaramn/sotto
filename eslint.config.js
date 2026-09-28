@@ -12,6 +12,10 @@ export default [
     },
   },
   {
+    files: ['store/**/*.js'],
+    languageOptions: { sourceType: 'script', globals: globals.browser },
+  },
+  {
     files: ['src/offscreen/limiter-processor.js'],
     languageOptions: { globals: globals.audioWorklet },
   },
