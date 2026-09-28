@@ -18,6 +18,10 @@
  * Every e averaged in step 4 is at most r[n-L], so |y| <= ceiling without
  * overshoot, and the attack is a smooth L-sample ramp instead of a click.
  * All steps are O(1) per sample.
+ *
+ * When disabled, r is always 1: the gain glides back to unity over the
+ * release time and loud passages hard-clip at the ceiling, like a plain
+ * gain boost would.
  */
 
 /** Release gets snapped to exactly 1 this close to it, so pass-through stays bit-exact. */
@@ -36,6 +40,7 @@ export class Limiter {
     this.length = Math.max(1, Math.round(lookahead * sampleRate));
     this.releaseCoefficient = Math.exp(-1 / (release * sampleRate));
     this.channels = channels;
+    this.enabled = true;
 
     /** Look-ahead delay line per channel, and the moving-average window of gains. */
     this.delay = Array.from({ length: channels }, () => new Float32Array(this.length));
@@ -79,7 +84,7 @@ export class Limiter {
         if (magnitude > peak) peak = magnitude;
       }
 
-      const held = this.#hold(peak > ceiling ? ceiling / peak : 1);
+      const held = this.#hold(this.enabled && peak > ceiling ? ceiling / peak : 1);
       if (held <= this.envelope) {
         this.envelope = held;
       } else {
@@ -98,7 +103,9 @@ export class Limiter {
         let sample = line[slot] * gain;
         line[slot] = input[c]?.[i] ?? 0;
         if (sample > ceiling || sample < -ceiling) {
-          if ((sample < 0 ? -sample : sample) > ceiling * ROUNDING_TOLERANCE) this.overshoots++;
+          if (this.enabled && (sample < 0 ? -sample : sample) > ceiling * ROUNDING_TOLERANCE) {
+            this.overshoots++;
+          }
           sample = sample > 0 ? ceiling : -ceiling;
         }
         const out = output[c];

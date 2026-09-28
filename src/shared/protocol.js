@@ -22,6 +22,8 @@ export const Msg = Object.freeze({
   APPLY: 'apply',
   /** Offscreen -> service worker: a tab's capture ended on its own (tab closed). */
   TAB_ENDED: 'tab-ended',
+  /** Turn the shared limiter on or off (a global preference). */
+  SET_LIMITER: 'set-limiter',
 });
 
 /** Volume is expressed in percent; above 100 is boost. */

@@ -173,12 +173,29 @@ svg {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  background: none;
+  font-family: inherit;
   transform: translateY(-50%);
-  cursor: help;
+  cursor: pointer;
   transition:
     color 0.15s,
     border-color 0.15s,
     background 0.15s;
+}
+
+.limiter:hover {
+  border-color: var(--muted);
+}
+
+.limiter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Turned off: boosted audio may clip. */
+.limiter[aria-pressed='false'] {
+  border-style: dashed;
+  text-decoration: line-through;
 }
 
 .limiter[data-active] {

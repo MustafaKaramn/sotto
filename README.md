@@ -11,7 +11,7 @@
 ## Features
 
 - **Volume slider per tab**: 0–500%. The left half of the slider covers 0–100% and the right half is boost, shown in a different color. Drags snap to 100%. The mouse wheel moves it in steps of 5, and the arrow keys in steps of 1.
-- **Clean boost**: a look-ahead limiter keeps boosted audio from clipping or crackling. Below the clipping point it leaves the audio untouched. A **Limiter** badge lights up while it's working.
+- **Clean boost**: a look-ahead limiter keeps boosted audio from clipping or crackling. Below the clipping point it leaves the audio untouched. A **Limiter** badge lights up while it's working. Clicking the badge turns the limiter off for people who want maximum loudness at any cost. On already-loud sources, that adds about 6 dB at 500%, with audible distortion. The choice is remembered.
 - **Mono**: plays both channels in both ears. Useful for videos whose sound comes from one side only.
 - **Balance**: turns the left or right side down, for example for uneven hearing or a single earbud. Unlike a panner, it never moves one side's content into the other. It works together with mono. Drags snap to the centre, and a double-click recentres it. At the centre, audio passes through bit-exact.
 - **Night mode**: tames loud effects and brings dialogue forward, for films where the voices are too quiet and the explosions too loud. It lowers the bass a little, lifts the speech range and narrows the dynamic range. Measured in Chrome, quiet speech comes up about 8 dB and full-scale hits drop about 8–10 dB. While it's off, none of its processing runs.
@@ -25,7 +25,7 @@
 
 - **Touches nothing until you ask it to.** Opening the popup does nothing to the tab. Sotto only takes control once you move a control.
 - **Leaves nothing behind.** Releasing the last tab closes the audio engine entirely. An idle Sotto has no running page and no background work.
-- **No data, no network.** No analytics, no remote code, no storage. See [PRIVACY.md](PRIVACY.md).
+- **No data, no network.** No analytics, no remote code. The only thing stored is the limiter on/off preference, locally. See [PRIVACY.md](PRIVACY.md).
 - **No framework, no build step.** Plain JavaScript modules with JSDoc types. The whole extension is about 15 KB zipped.
 
 ## How it works
@@ -84,6 +84,7 @@ The version lives in both `src/manifest.json` and `package.json`. `npm run pack`
 | `activeTab`  | Read the current tab's title and icon when you open the popup, and allow capturing it.   |
 | `tabCapture` | Capture the tab's audio so its volume and channels can be changed.                       |
 | `offscreen`  | Run the Web Audio engine in a hidden page. Manifest V3 service workers can't play audio. |
+| `storage`    | Remember whether the limiter is on or off.                                               |
 
 Sotto doesn't request host permissions and doesn't inject scripts into pages.
 

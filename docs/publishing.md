@@ -35,6 +35,7 @@ Reviews usually take from a few hours to a few days. Narrow permissions and a cl
 
 - `activeTab`: Read the title and icon of the tab the user opened the popup on, and allow capturing that tab's audio when the user moves a control.
 - `tabCapture`: Capture the audio of the tab the user chose, so the extension can change its volume and channel layout. The audio is processed locally and played back immediately. It is never recorded or transmitted.
+- `storage`: Remember one user preference, whether the limiter is on or off. Nothing else is stored.
 - `offscreen`: Host the Web Audio engine that processes the captured tab audio. Manifest V3 service workers cannot process or play audio.
 
 **Remote code**: No, I am not using remote code.

@@ -19,6 +19,8 @@ import {
  */
 
 const OFFSCREEN_URL = 'offscreen/offscreen.html';
+/** chrome.storage.local key for the limiter preference. */
+const LIMITER_KEY = 'limiterEnabled';
 const BADGE_COLOR = '#5b5bd6';
 /** Volume change per keyboard shortcut press, in percent. */
 const SHORTCUT_VOLUME_STEP = 10;
@@ -42,6 +44,8 @@ listen(Target.BACKGROUND, (message) => {
       return release(message.tabId);
     case Msg.TAB_ENDED:
       return afterRelease(message.tabId, message.remaining);
+    case Msg.SET_LIMITER:
+      return setLimiterEnabled(message.enabled);
     default:
       throw new Error(`Unknown message: ${message.type}`);
   }
@@ -92,8 +96,21 @@ async function runCommand(command, tabId) {
 }
 
 async function getState() {
-  if (!(await hasOffscreenDocument())) return { tabs: [], limiting: false };
-  return send(Target.OFFSCREEN, Msg.GET_STATE);
+  const limiterEnabled = await isLimiterEnabled();
+  if (!(await hasOffscreenDocument())) return { tabs: [], limiting: false, limiterEnabled };
+  return { ...(await send(Target.OFFSCREEN, Msg.GET_STATE)), limiterEnabled };
+}
+
+async function isLimiterEnabled() {
+  const { [LIMITER_KEY]: enabled = true } = await chrome.storage.local.get(LIMITER_KEY);
+  return enabled;
+}
+
+/** @param {boolean} enabled */
+async function setLimiterEnabled(enabled) {
+  await chrome.storage.local.set({ [LIMITER_KEY]: enabled });
+  if (await hasOffscreenDocument()) await send(Target.OFFSCREEN, Msg.SET_LIMITER, { enabled });
+  return { ok: true };
 }
 
 /**
@@ -142,6 +159,7 @@ async function startCapture(tabId, settings) {
     tabId,
     streamId,
     settings,
+    limiterEnabled: await isLimiterEnabled(),
     meta: { title: tab.title ?? '', favIconUrl: tab.favIconUrl ?? '' },
   });
 }
@@ -185,7 +203,8 @@ async function ensureOffscreenDocument() {
     .createDocument({
       url: OFFSCREEN_URL,
       reasons: [chrome.offscreen.Reason.USER_MEDIA],
-      justification: 'Processes tab audio captured with chrome.tabCapture (volume, mono).',
+      justification:
+        'Processes tab audio captured with chrome.tabCapture (volume, mono, night mode, balance).',
     })
     .finally(() => {
       creatingOffscreen = null;

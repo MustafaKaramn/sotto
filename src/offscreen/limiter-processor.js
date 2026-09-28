@@ -15,6 +15,9 @@ class LimiterProcessor extends AudioWorkletProcessor {
     this.limiter = new Limiter(sampleRate);
     this.active = false;
     this.lastActiveTime = -Infinity;
+    this.port.onmessage = (event) => {
+      if (typeof event.data?.enabled === 'boolean') this.limiter.enabled = event.data.enabled;
+    };
   }
 
   /**
@@ -25,7 +28,7 @@ class LimiterProcessor extends AudioWorkletProcessor {
     const lowest = this.limiter.process(inputs[0] ?? [], outputs[0]);
     if (lowest < ACTIVE_BELOW) this.lastActiveTime = currentTime;
 
-    const active = currentTime - this.lastActiveTime < HOLD_SECONDS;
+    const active = this.limiter.enabled && currentTime - this.lastActiveTime < HOLD_SECONDS;
     if (active !== this.active) {
       this.active = active;
       this.port.postMessage({ limiting: active });

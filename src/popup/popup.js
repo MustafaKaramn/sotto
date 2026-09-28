@@ -119,7 +119,7 @@ const ui = {
   title: /** @type {HTMLElement} */ (document.getElementById('tab-title')),
   status: /** @type {HTMLElement} */ (document.getElementById('status')),
   readout: /** @type {HTMLElement} */ (document.getElementById('readout')),
-  limiter: /** @type {HTMLElement} */ (document.getElementById('limiter')),
+  limiter: /** @type {HTMLButtonElement} */ (document.getElementById('limiter')),
   value: /** @type {HTMLOutputElement} */ (document.getElementById('volume-value')),
   volume: /** @type {HTMLInputElement} */ (document.getElementById('volume')),
   mono: /** @type {HTMLButtonElement} */ (document.getElementById('mono')),
@@ -145,15 +145,16 @@ async function main() {
   document.documentElement.style.setProperty('--unity', String(UNITY_POSITION));
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  /** @type {{ tabs: ControlledTab[], limiting: boolean }} */
-  const { tabs, limiting } = await send(Target.BACKGROUND, Msg.GET_STATE);
+  /** @type {{ tabs: ControlledTab[], limiting: boolean, limiterEnabled: boolean }} */
+  const { tabs, limiting, limiterEnabled } = await send(Target.BACKGROUND, Msg.GET_STATE);
 
   setUpCurrentTab(
     tab,
     tabs.find((controlled) => controlled.tabId === tab.id),
   );
   setUpOtherTabs(tabs.filter((controlled) => controlled.tabId !== tab.id));
-  showLimiting(limiting);
+  showLimiter(limiting, limiterEnabled);
+  ui.limiter.addEventListener('click', toggleLimiter);
   setInterval(pollLimiter, LIMITER_POLL_MS);
   await showShortcuts();
 }
@@ -187,16 +188,32 @@ async function showShortcuts() {
 async function pollLimiter() {
   if (ui.limiter.hidden) return;
   try {
-    const { limiting } = await send(Target.BACKGROUND, Msg.GET_STATE);
-    showLimiting(limiting);
+    const { limiting, limiterEnabled } = await send(Target.BACKGROUND, Msg.GET_STATE);
+    showLimiter(limiting, limiterEnabled);
   } catch {
-    showLimiting(false);
+    showLimiter(false, isLimiterEnabled());
   }
 }
 
-/** @param {boolean} limiting */
-function showLimiting(limiting) {
-  ui.limiter.toggleAttribute('data-active', limiting);
+/** The limiter is global: turning it off lets boosted audio clip on every tab. */
+function toggleLimiter() {
+  const enabled = !isLimiterEnabled();
+  showLimiter(false, enabled);
+  send(Target.BACKGROUND, Msg.SET_LIMITER, { enabled }).catch(console.error);
+}
+
+function isLimiterEnabled() {
+  return ui.limiter.getAttribute('aria-pressed') !== 'false';
+}
+
+/**
+ * @param {boolean} limiting
+ * @param {boolean} enabled
+ */
+function showLimiter(limiting, enabled) {
+  ui.limiter.setAttribute('aria-pressed', String(enabled));
+  ui.limiter.toggleAttribute('data-active', enabled && limiting);
+  ui.limiter.title = i18n(enabled ? 'limiterHintOn' : 'limiterHintOff');
 }
 
 /**

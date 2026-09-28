@@ -24,7 +24,7 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "tabCapture", "offscreen"],
+  "permissions": ["activeTab", "tabCapture", "offscreen", "storage"],
   "commands": {
     "volume-up": {
       "suggested_key": {

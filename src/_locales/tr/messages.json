@@ -14,8 +14,11 @@
   "limiter": {
     "message": "Sınırlayıcı"
   },
-  "limiterHint": {
-    "message": "Yükseltilen sesin patlamasını önler. Yanarken daha fazla açmak sesi yükseltmez, yalnızca sıkıştırır."
+  "limiterHintOn": {
+    "message": "Sınırlayıcı açık: yükseltilen sesin patlamasını önler. Yanarken daha fazla açmak sesi yükseltmez, yalnızca sıkıştırır. Kapatmak için tıklayın."
+  },
+  "limiterHintOff": {
+    "message": "Sınırlayıcı kapalı: yükseltilen sesin yüksek kısımları tüm sekmelerde kırpılıp cızırdar. Tekrar açmak için tıklayın."
   },
   "statusIdle": {
     "message": "Dokunulmadı"

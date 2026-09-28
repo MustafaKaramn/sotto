@@ -99,3 +99,27 @@ test('costs a small fraction of real time', () => {
   );
   assert.ok(share < 0.05, `took ${(share * 100).toFixed(2)}% of real time`);
 });
+
+test('when disabled, applies no gain reduction and just clips at the ceiling', () => {
+  const limiter = new Limiter(SAMPLE_RATE);
+  limiter.enabled = false;
+  const { out, lowest } = run(limiter, (i) => 3 * Math.sin(i / 20), SAMPLE_RATE);
+
+  assert.equal(lowest, 1);
+  assert.ok(peakOf(out) <= 1);
+  const clipped = out[0].filter((sample) => Math.abs(sample) === 1).length;
+  assert.ok(clipped > out[0].length / 2, `only ${clipped} samples clipped`);
+});
+
+test('switching off glides back to unity instead of jumping', () => {
+  const limiter = new Limiter(SAMPLE_RATE);
+  run(limiter, (i) => 4 * Math.sin(i / 20), SAMPLE_RATE / 2);
+  const before = limiter.envelope;
+
+  limiter.enabled = false;
+  run(limiter, (i) => 4 * Math.sin(i / 20), SAMPLE_RATE / 100);
+  assert.ok(limiter.envelope > before && limiter.envelope < 0.5, `gain ${limiter.envelope}`);
+
+  run(limiter, (i) => 4 * Math.sin(i / 20), SAMPLE_RATE * 3);
+  assert.equal(limiter.envelope, 1);
+});

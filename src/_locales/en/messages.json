@@ -17,8 +17,11 @@
   "limiter": {
     "message": "Limiter"
   },
-  "limiterHint": {
-    "message": "Keeps boosted sound from distorting. While it's lit, turning up further compresses the sound instead of making it louder."
+  "limiterHintOn": {
+    "message": "Limiter on: keeps boosted sound from distorting. While it's lit, turning up further compresses the sound instead of making it louder. Click to turn it off."
+  },
+  "limiterHintOff": {
+    "message": "Limiter off: loud parts of boosted sound will clip and crackle, for every tab. Click to turn it back on."
   },
   "statusIdle": {
     "message": "Untouched",

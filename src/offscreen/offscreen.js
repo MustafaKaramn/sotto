@@ -56,6 +56,9 @@ let engine = null;
 /** Whether the limiter is currently holding the output down. */
 let limiting = false;
 
+/** The user's preference; the service worker keeps it and passes it on. */
+let limiterEnabled = true;
+
 /** @type {Map<number, Channel>} */
 const channels = new Map();
 
@@ -70,7 +73,11 @@ listen(Target.OFFSCREEN, async (message) => {
         limiting,
       };
     case Msg.CAPTURE:
+      setLimiterEnabled(message.limiterEnabled);
       await capture(message.tabId, message.streamId, message.settings, message.meta);
+      return { ok: true };
+    case Msg.SET_LIMITER:
+      setLimiterEnabled(message.enabled);
       return { ok: true };
     case Msg.APPLY:
       return { applied: apply(message.tabId, message.settings) };
@@ -97,8 +104,16 @@ async function createEngine() {
     channelCountMode: 'explicit',
   });
   limiter.port.onmessage = (event) => (limiting = event.data.limiting);
+  limiter.port.postMessage({ enabled: limiterEnabled });
   limiter.connect(context.destination);
   return { context, limiter };
+}
+
+/** @param {boolean} enabled */
+function setLimiterEnabled(enabled) {
+  limiterEnabled = enabled;
+  if (!enabled) limiting = false;
+  engine?.then(({ limiter }) => limiter.port.postMessage({ enabled }));
 }
 
 async function closeEngine() {

@@ -18,13 +18,14 @@
         <h1 class="sr-only" id="volume-label" data-i18n="volume"></h1>
         <p class="readout" id="readout">
           <output id="volume-value" for="volume">100</output><span class="readout__unit">%</span>
-          <span
+          <button
             class="limiter"
             id="limiter"
+            type="button"
+            aria-pressed="true"
             data-i18n="limiter"
-            data-i18n-title="limiterHint"
             hidden
-          ></span>
+          ></button>
         </p>
         <div class="slider-wrap">
           <input class="slider" id="volume" type="range" aria-labelledby="volume-label" />
