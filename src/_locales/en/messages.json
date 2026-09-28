@@ -24,12 +24,12 @@
     "message": "Limiter off: loud parts of boosted sound will clip and crackle, for every tab. Click to turn it back on."
   },
   "statusIdle": {
-    "message": "Untouched",
-    "description": "The extension is not doing anything to this tab."
+    "message": "Off",
+    "description": "Sotto is not doing anything to this tab."
   },
   "statusActive": {
-    "message": "Controlling",
-    "description": "The extension is processing this tab's audio."
+    "message": "Active",
+    "description": "Sotto is processing this tab's audio."
   },
   "mono": {
     "message": "Mono"
@@ -65,19 +65,19 @@
     "message": "Back to defaults: 100%, stereo, night mode off, balance centred"
   },
   "release": {
-    "message": "Release"
+    "message": "Turn off"
   },
   "releaseHint": {
-    "message": "Stop controlling this tab and leave it exactly as it was"
+    "message": "Turn Sotto off for this tab. Its sound goes back to exactly how it was."
   },
   "otherTabs": {
-    "message": "Other controlled tabs"
+    "message": "Other active tabs"
   },
   "goToTab": {
     "message": "Go to tab"
   },
   "releaseTab": {
-    "message": "Release this tab"
+    "message": "Turn off for this tab"
   },
   "noticeRestricted": {
     "message": "The browser doesn't allow controlling audio on this page."
@@ -101,7 +101,7 @@
     "message": "Reset to defaults"
   },
   "commandRelease": {
-    "message": "Release the tab"
+    "message": "Turn off for the current tab"
   },
   "commandNight": {
     "message": "Toggle night mode"

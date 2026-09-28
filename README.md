@@ -16,7 +16,7 @@
 - **Balance**: turns the left or right side down, for example for uneven hearing or a single earbud. Unlike a panner, it never moves one side's content into the other. It works together with mono. Drags snap to the centre, and a double-click recentres it. At the centre, audio passes through bit-exact.
 - **Night mode**: tames loud effects and brings dialogue forward, for films where the voices are too quiet and the explosions too loud. It lowers the bass a little, lifts the speech range and narrows the dynamic range. Measured in Chrome, quiet speech comes up about 8 dB and full-scale hits drop about 8–10 dB. While it's off, none of its processing runs.
 - **Reset**: back to 100%, stereo, night mode off, balance centred.
-- **Release**: stops controlling the tab completely. The capture ends, Chrome's "sharing this tab" indicator goes away, and the tab plays exactly as it did before.
+- **Turn off** (the power button): stops controlling the tab completely. The capture ends, Chrome's "sharing this tab" indicator goes away, and the tab plays exactly as it did before.
 - **Keyboard shortcuts** that work without opening the popup: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> change the volume by 10%, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> toggles mono, and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd> releases the tab. Reset and night mode have no default keys but can be assigned. You can change all of them at `chrome://extensions/shortcuts`.
 - **All controlled tabs in one place**: every tab Sotto is controlling appears in the popup, with its own slider.
 - **English and Turkish** UI; it follows the browser language.
@@ -43,7 +43,7 @@ popup ──► service worker ──► offscreen document (audio engine)
 - [`src/offscreen/limiter.js`](src/offscreen/limiter.js): the limiter's DSP. It's plain code with no Web Audio dependency, so [`tests/`](tests) can check it in Node. The tests confirm that no sample exceeds the ceiling at 500%, that audio below the ceiling passes through bit-exact, and that the limiter costs about 0.2% of real time.
 - [`src/shared/protocol.js`](src/shared/protocol.js): message types, shared constants and messaging helpers.
 
-Sotto uses `chrome.tabCapture` because it is the only approach that handles **all** audio in a tab: `<video>`, Web Audio, cross-origin iframes. It also allows boost and mono. The trade-off is that Chrome shows its tab-sharing indicator **while a tab is being controlled**. Chrome shows that indicator for every tab capture as a security measure, and extensions can't hide it. What Sotto guarantees is that the indicator goes away the moment you press **Release**.
+Sotto uses `chrome.tabCapture` because it is the only approach that handles **all** audio in a tab: `<video>`, Web Audio, cross-origin iframes. It also allows boost and mono. The trade-off is that Chrome shows its tab-sharing indicator **while a tab is being controlled**. Chrome shows that indicator for every tab capture as a security measure, and extensions can't hide it. What Sotto guarantees is that the indicator goes away the moment you press **Turn off**.
 
 ## Browser support
 
@@ -95,4 +95,6 @@ See [docs/publishing.md](docs/publishing.md).
 
 ## License
 
-[MIT](LICENSE)
+Copyright © 2026 Mustafa Karaman.
+
+Sotto is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License](LICENSE), version 3 or (at your option) any later version. It is distributed in the hope that it will be useful, but without any warranty; see the license for details.

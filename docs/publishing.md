@@ -5,7 +5,7 @@
 1. Bump `version` in **both** `src/manifest.json` and `package.json`. Every upload needs a version higher than the last one.
 2. Run `npm run check`.
 3. Run `npm run pack`. This produces `dist/sotto-<version>.zip`.
-4. Load `src/` unpacked one last time and test: volume, boost, mono, reset, release (the sharing indicator must disappear), and closing a controlled tab.
+4. Load `src/` unpacked one last time and test: volume, boost, mono, night mode, balance, reset, turn off (the sharing indicator must disappear), and closing a controlled tab.
 5. Commit, tag the release (`git tag v<version>`) and push.
 6. Upload the zip to the stores (see below).
 

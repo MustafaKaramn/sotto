@@ -12,19 +12,19 @@
     "message": "Ses düzeyi"
   },
   "limiter": {
-    "message": "Sınırlayıcı"
+    "message": "Koruma"
   },
   "limiterHintOn": {
-    "message": "Sınırlayıcı açık: yükseltilen sesin patlamasını önler. Yanarken daha fazla açmak sesi yükseltmez, yalnızca sıkıştırır. Kapatmak için tıklayın."
+    "message": "Koruma açık: yükseltilen sesin patlamasını önler. Yanarken daha fazla açmak sesi yükseltmez, yalnızca sıkıştırır. Kapatmak için tıklayın."
   },
   "limiterHintOff": {
-    "message": "Sınırlayıcı kapalı: yükseltilen sesin yüksek kısımları tüm sekmelerde kırpılıp cızırdar. Tekrar açmak için tıklayın."
+    "message": "Koruma kapalı: yükseltilen sesin yüksek kısımları tüm sekmelerde kırpılıp cızırdar. Tekrar açmak için tıklayın."
   },
   "statusIdle": {
-    "message": "Dokunulmadı"
+    "message": "Kapalı"
   },
   "statusActive": {
-    "message": "Kontrolde"
+    "message": "Aktif"
   },
   "mono": {
     "message": "Mono"
@@ -60,19 +60,19 @@
     "message": "Varsayılana dön: %100, stereo, gece modu kapalı, denge ortada"
   },
   "release": {
-    "message": "Bırak"
+    "message": "Kapat"
   },
   "releaseHint": {
-    "message": "Bu sekmeyi kontrol etmeyi bırak, her şey eskisi gibi olsun"
+    "message": "Bu sekmede Sotto'yu kapat; ses tamamen eski haline döner."
   },
   "otherTabs": {
-    "message": "Kontrol edilen diğer sekmeler"
+    "message": "Diğer aktif sekmeler"
   },
   "goToTab": {
     "message": "Sekmeye git"
   },
   "releaseTab": {
-    "message": "Bu sekmeyi bırak"
+    "message": "Bu sekmede kapat"
   },
   "noticeRestricted": {
     "message": "Tarayıcı bu sayfada ses kontrolüne izin vermiyor."
@@ -96,7 +96,7 @@
     "message": "Varsayılana dön"
   },
   "commandRelease": {
-    "message": "Sekmeyi bırak"
+    "message": "Geçerli sekmede kapat"
   },
   "commandNight": {
     "message": "Gece modunu aç/kapat"
