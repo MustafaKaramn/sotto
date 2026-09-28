@@ -37,8 +37,11 @@ const KEY_STEPS = /** @type {Record<string, number>} */ ({
 const LIMITER_POLL_MS = 300;
 /** Balance drags this close to the centre snap onto it. */
 const BALANCE_SNAP = 6;
-/** Pages whose audio the browser lets extensions capture. */
+/** Pages whose audio the browser lets extensions capture... */
 const CAPTURABLE_URL = /^(https?|file):/;
+/** ...except the extension stores, which browsers protect from extensions. */
+const STORE_URL =
+  /^https:\/\/(chromewebstore\.google\.com|chrome\.google\.com\/webstore|microsoftedge\.microsoft\.com\/addons)/;
 
 /** @param {string} key */
 const i18n = (key) => chrome.i18n.getMessage(key);
@@ -225,7 +228,8 @@ function setUpCurrentTab(tab, controlled) {
   showFavicon(ui.favicon, tab.favIconUrl);
   setUpSlider(ui.volume);
 
-  if (tab.id === undefined || !CAPTURABLE_URL.test(tab.url ?? '')) {
+  const url = tab.url ?? '';
+  if (tab.id === undefined || !CAPTURABLE_URL.test(url) || STORE_URL.test(url)) {
     for (const control of [ui.volume, ui.mono, ui.night, ui.balance, ui.reset, ui.release]) {
       control.disabled = true;
     }

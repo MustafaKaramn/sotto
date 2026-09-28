@@ -19,7 +19,7 @@
 **Each item needs**
 
 - **Package**: `dist/sotto-<version>.zip`.
-- **Store listing**: a description, at least one screenshot (1280×800 or 640×400), a 128×128 icon (the zip already has one), and optionally a 440×280 promo tile.
+- **Store listing**: a description, at least one screenshot (1280×800 or 640×400), a 128×128 icon (the zip already has one), and a 440×280 small promo tile. `npm run store-assets` renders all of them into `store/images/`: three screenshots each in English and Turkish, plus the promo tile. Each screenshot is the real popup with demo data, so run the script again whenever the UI changes. Upload the Turkish screenshots to the Turkish listing.
 - **Privacy tab**: fill it in with the text below.
 - **Distribution**: public, and all regions unless you want to restrict them.
 
@@ -29,7 +29,7 @@ Reviews usually take from a few hours to a few days. Narrow permissions and a cl
 
 **Single purpose**
 
-> Sotto lets the user change the volume of individual browser tabs (including boosting above 100% and switching to mono), and restore or release them.
+> Sotto adjusts the audio of individual browser tabs the user chooses: volume (including boost above 100% with a limiter), mono, night mode (dialogue clarity) and left/right balance. It can also restore or release those tabs.
 
 **Permission justifications**
 
@@ -42,7 +42,7 @@ Reviews usually take from a few hours to a few days. Narrow permissions and a cl
 
 **Data usage**: Leave every data category unchecked. Then certify that the extension does not sell data, does not use or transfer data for purposes unrelated to its single purpose, and does not use data for creditworthiness or lending.
 
-**Privacy policy URL**: link to `PRIVACY.md` in the GitHub repository.
+**Privacy policy URL**: this must be a publicly reachable page. A public repository can link to its `PRIVACY.md`. A private repository can't, so host the policy somewhere public instead, such as a public gist, a small public repository with GitHub Pages, or a Google Sites page.
 
 ## Microsoft Edge Add-ons
 

@@ -4,7 +4,7 @@
     "description": "Extension name shown in the browser and the store."
   },
   "extDescription": {
-    "message": "Per-tab volume with boost and mono audio. Light, open source, and it fully lets go of the tab when you're done.",
+    "message": "Per-tab volume up to 500% without distortion, plus mono, night mode and balance. Leaves the tab untouched when you're done.",
     "description": "Short description, max 132 characters."
   },
   "actionTitle": {
@@ -62,7 +62,7 @@
     "message": "Reset"
   },
   "resetHint": {
-    "message": "Back to 100%, stereo"
+    "message": "Back to defaults: 100%, stereo, night mode off, balance centred"
   },
   "release": {
     "message": "Release"
@@ -98,7 +98,7 @@
     "message": "Toggle mono"
   },
   "commandReset": {
-    "message": "Reset to 100%, stereo"
+    "message": "Reset to defaults"
   },
   "commandRelease": {
     "message": "Release the tab"

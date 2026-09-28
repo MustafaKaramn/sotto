@@ -3,7 +3,7 @@
     "message": "Sotto – Sekme Ses Kontrolü"
   },
   "extDescription": {
-    "message": "Sekme başına ses kontrolü: yükseltme ve mono ses. Hafif, açık kaynak; işin bitince sekmeyi tamamen serbest bırakır."
+    "message": "Sekme başına %500'e kadar temiz ses; mono, gece modu ve denge. İşiniz bitince sekmeye hiç dokunmamış gibi çekilir."
   },
   "actionTitle": {
     "message": "Sotto: sekme sesi"
@@ -57,7 +57,7 @@
     "message": "Sıfırla"
   },
   "resetHint": {
-    "message": "%100'e ve stereoya dön"
+    "message": "Varsayılana dön: %100, stereo, gece modu kapalı, denge ortada"
   },
   "release": {
     "message": "Bırak"
@@ -93,7 +93,7 @@
     "message": "Mono aç/kapat"
   },
   "commandReset": {
-    "message": "%100'e ve stereoya dön"
+    "message": "Varsayılana dön"
   },
   "commandRelease": {
     "message": "Sekmeyi bırak"

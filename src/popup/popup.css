@@ -38,6 +38,11 @@
   box-sizing: border-box;
 }
 
+/* Components set their own display, which would otherwise override [hidden]. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   width: 300px;
