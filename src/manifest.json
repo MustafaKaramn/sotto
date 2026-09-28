@@ -44,6 +44,9 @@
       },
       "description": "__MSG_commandMono__"
     },
+    "toggle-night": {
+      "description": "__MSG_commandNight__"
+    },
     "release": {
       "suggested_key": {
         "default": "Alt+Shift+0"

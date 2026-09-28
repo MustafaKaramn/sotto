@@ -2,8 +2,8 @@
  * Audio engine. Each controlled tab gets one small graph, and all of them meet
  * in a shared limiter on one AudioContext:
  *
- *   tab stream -> gain (volume) -> mixer (stereo | mono) ─┐
- *   tab stream -> gain (volume) -> mixer (stereo | mono) ─┴-> limiter -> speakers
+ *   tab stream -> gain (volume) -> [night mode] -> mixer (stereo | mono) ─┐
+ *   tab stream -> gain (volume) -> [night mode] -> mixer (stereo | mono) ─┴-> limiter -> speakers
  *
  * The limiter keeps boosted audio (and the sum of several tabs) from clipping;
  * below the ceiling it passes audio through untouched.
@@ -12,12 +12,14 @@
  * speakers. Releasing a tab stops its tracks, which is what makes Chrome drop
  * the "tab is being shared" indicator; the tab then plays on its own again.
  */
-import { Msg, Target, listen, send } from '../shared/protocol.js';
+import { Msg, Target, listen, send, toSettings } from '../shared/protocol.js';
+import { createNightChain } from './night-mode.js';
 
 /**
  * @typedef {import('../shared/protocol.js').Settings} Settings
  * @typedef {import('../shared/protocol.js').TabMeta} TabMeta
  * @typedef {import('../shared/protocol.js').ControlledTab} ControlledTab
+ * @typedef {import('./night-mode.js').NightChain} NightChain
  */
 
 /**
@@ -26,6 +28,9 @@ import { Msg, Target, listen, send } from '../shared/protocol.js';
  * @property {MediaStreamAudioSourceNode} source
  * @property {GainNode} gain
  * @property {GainNode} mixer
+ * @property {NightChain | null} night Created the first time night mode is used.
+ * @property {boolean} nightWired Whether the night chain is currently in the path.
+ * @property {boolean} rewiring
  * @property {TabMeta} meta
  * @property {Settings} settings
  */
@@ -38,6 +43,9 @@ import { Msg, Target, listen, send } from '../shared/protocol.js';
 
 /** Time constant for volume changes: feels instant, but doesn't click. */
 const SMOOTHING_SECONDS = 0.015;
+/** Rewiring happens under a short fade, so switching paths never clicks. */
+const REWIRE_FADE_SECONDS = 0.004;
+const REWIRE_WAIT_MS = 25;
 
 /** @type {Promise<Engine> | null} */
 let engine = null;
@@ -121,8 +129,22 @@ async function capture(tabId, streamId, settings, meta) {
     const source = context.createMediaStreamSource(stream);
     const gain = context.createGain();
     const mixer = context.createGain();
-    source.connect(gain).connect(mixer).connect(limiter);
-    channels.set(tabId, { stream, source, gain, mixer, meta, settings });
+    source.connect(gain);
+    mixer.connect(limiter);
+    /** @type {Channel} */
+    const channel = {
+      stream,
+      source,
+      gain,
+      mixer,
+      night: null,
+      nightWired: false,
+      rewiring: false,
+      meta,
+      settings,
+    };
+    wire(channel, settings.night);
+    channels.set(tabId, channel);
     apply(tabId, settings);
 
     for (const track of stream.getAudioTracks()) {
@@ -158,8 +180,47 @@ function apply(tabId, settings) {
   channel.mixer.channelCount = settings.mono ? 1 : 2;
   channel.mixer.channelCountMode = settings.mono ? 'explicit' : 'max';
 
-  channel.settings = { volume: settings.volume, mono: settings.mono };
+  channel.settings = toSettings(settings);
+  if (settings.night !== channel.nightWired) rewire(tabId, channel);
   return true;
+}
+
+/**
+ * Switches a channel's path to match its night setting: fade out, reconnect,
+ * fade back in. Toggles that arrive meanwhile are picked up at the end.
+ * @param {number} tabId
+ * @param {Channel} channel
+ */
+function rewire(tabId, channel) {
+  if (channel.rewiring) return;
+  channel.rewiring = true;
+  const fade = channel.mixer.gain;
+  fade.setTargetAtTime(0, channel.mixer.context.currentTime, REWIRE_FADE_SECONDS);
+
+  setTimeout(() => {
+    channel.rewiring = false;
+    if (channels.get(tabId) !== channel) return;
+    wire(channel, channel.settings.night);
+    fade.setTargetAtTime(1, channel.mixer.context.currentTime, REWIRE_FADE_SECONDS);
+  }, REWIRE_WAIT_MS);
+}
+
+/**
+ * Connects gain -> mixer either directly or through the night chain.
+ * @param {Channel} channel
+ * @param {boolean} night
+ */
+function wire(channel, night) {
+  channel.gain.disconnect();
+  channel.night?.output.disconnect();
+  if (night) {
+    channel.night ??= createNightChain(channel.gain.context);
+    channel.gain.connect(channel.night.input);
+    channel.night.output.connect(channel.mixer);
+  } else {
+    channel.gain.connect(channel.mixer);
+  }
+  channel.nightWired = night;
 }
 
 /** @param {number} tabId */
@@ -170,6 +231,7 @@ function release(tabId) {
 
   channel.source.disconnect();
   channel.gain.disconnect();
+  for (const node of channel.night?.nodes ?? []) node.disconnect();
   channel.mixer.disconnect();
   for (const track of channel.stream.getTracks()) track.stop();
 

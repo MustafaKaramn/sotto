@@ -32,7 +32,11 @@ export const Volume = Object.freeze({
 });
 
 /** @type {Readonly<Settings>} */
-export const DEFAULT_SETTINGS = Object.freeze({ volume: Volume.DEFAULT, mono: false });
+export const DEFAULT_SETTINGS = Object.freeze({
+  volume: Volume.DEFAULT,
+  mono: false,
+  night: false,
+});
 
 /**
  * Copies just the settings out of a larger object, such as a ControlledTab.
@@ -40,12 +44,16 @@ export const DEFAULT_SETTINGS = Object.freeze({ volume: Volume.DEFAULT, mono: fa
  * @returns {Settings}
  */
 export function toSettings(source) {
-  return { volume: source.volume, mono: source.mono };
+  return { volume: source.volume, mono: source.mono, night: source.night };
 }
 
 /** @param {Settings} settings */
 export function isDefault(settings) {
-  return settings.volume === DEFAULT_SETTINGS.volume && settings.mono === DEFAULT_SETTINGS.mono;
+  return (
+    settings.volume === DEFAULT_SETTINGS.volume &&
+    settings.mono === DEFAULT_SETTINGS.mono &&
+    settings.night === DEFAULT_SETTINGS.night
+  );
 }
 
 /** @param {number} volume */
@@ -57,6 +65,7 @@ export function clampVolume(volume) {
  * @typedef {object} Settings
  * @property {number} volume Percent, `Volume.MIN`..`Volume.MAX`.
  * @property {boolean} mono Downmix to a single channel played in both ears.
+ * @property {boolean} night Night mode: tame loud effects, bring dialogue forward.
  */
 
 /**

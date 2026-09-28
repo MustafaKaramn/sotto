@@ -34,6 +34,12 @@
   "monoHint": {
     "message": "Mono audio: play both channels in both ears (fixes one-sided sound)"
   },
+  "night": {
+    "message": "Night"
+  },
+  "nightHint": {
+    "message": "Night mode: tames loud effects and brings dialogue forward"
+  },
   "reset": {
     "message": "Reset"
   },
@@ -78,5 +84,8 @@
   },
   "commandRelease": {
     "message": "Release the tab"
+  },
+  "commandNight": {
+    "message": "Toggle night mode"
   }
 }

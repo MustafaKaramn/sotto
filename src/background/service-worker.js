@@ -82,6 +82,8 @@ async function runCommand(command, tabId) {
       });
     case 'toggle-mono':
       return update(tabId, { ...settings, mono: !settings.mono });
+    case 'toggle-night':
+      return update(tabId, { ...settings, night: !settings.night });
     case 'reset':
       return controlled && update(tabId, { ...DEFAULT_SETTINGS });
     case 'release':

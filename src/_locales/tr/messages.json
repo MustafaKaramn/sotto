@@ -29,6 +29,12 @@
   "monoHint": {
     "message": "Mono ses: iki kanalı da iki kulağa ver (tek taraflı sesi düzeltir)"
   },
+  "night": {
+    "message": "Gece"
+  },
+  "nightHint": {
+    "message": "Gece modu: patlamaları bastırır, diyaloğu öne çıkarır"
+  },
   "reset": {
     "message": "Sıfırla"
   },
@@ -73,5 +79,8 @@
   },
   "commandRelease": {
     "message": "Sekmeyi bırak"
+  },
+  "commandNight": {
+    "message": "Gece modunu aç/kapat"
   }
 }

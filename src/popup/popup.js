@@ -120,6 +120,7 @@ const ui = {
   value: /** @type {HTMLOutputElement} */ (document.getElementById('volume-value')),
   volume: /** @type {HTMLInputElement} */ (document.getElementById('volume')),
   mono: /** @type {HTMLButtonElement} */ (document.getElementById('mono')),
+  night: /** @type {HTMLButtonElement} */ (document.getElementById('night')),
   reset: /** @type {HTMLButtonElement} */ (document.getElementById('reset')),
   release: /** @type {HTMLButtonElement} */ (document.getElementById('release')),
   notice: /** @type {HTMLElement} */ (document.getElementById('notice')),
@@ -169,6 +170,7 @@ async function showShortcuts() {
   };
   hint(ui.volume, [key('volume-up'), key('volume-down')]);
   hint(ui.mono, [key('toggle-mono')]);
+  hint(ui.night, [key('toggle-night')]);
   hint(ui.reset, [key('reset')]);
   hint(ui.release, [key('release')]);
 
@@ -203,7 +205,9 @@ function setUpCurrentTab(tab, controlled) {
   setUpSlider(ui.volume);
 
   if (tab.id === undefined || !CAPTURABLE_URL.test(tab.url ?? '')) {
-    for (const control of [ui.volume, ui.mono, ui.reset, ui.release]) control.disabled = true;
+    for (const control of [ui.volume, ui.mono, ui.night, ui.reset, ui.release]) {
+      control.disabled = true;
+    }
     ui.status.textContent = i18n('statusIdle');
     renderSlider(ui.volume, Volume.DEFAULT);
     showNotice(i18n('noticeRestricted'));
@@ -219,12 +223,13 @@ function setUpCurrentTab(tab, controlled) {
   });
 
   function render() {
-    const { volume, mono } = controller.settings;
+    const { volume, mono, night } = controller.settings;
     renderSlider(ui.volume, volume);
     ui.value.textContent = String(volume);
     ui.readout.toggleAttribute('data-boost', volume > Volume.DEFAULT);
     ui.limiter.hidden = !controller.engaged || volume <= Volume.DEFAULT;
     ui.mono.setAttribute('aria-pressed', String(mono));
+    ui.night.setAttribute('aria-pressed', String(night));
     ui.reset.disabled = !controller.engaged || isDefault(controller.settings);
     ui.release.disabled = !controller.engaged;
     ui.status.dataset.state = controller.engaged ? 'active' : 'idle';
@@ -233,6 +238,7 @@ function setUpCurrentTab(tab, controlled) {
 
   bindSlider(ui.volume, controller);
   ui.mono.addEventListener('click', () => controller.set({ mono: !controller.settings.mono }));
+  ui.night.addEventListener('click', () => controller.set({ night: !controller.settings.night }));
   ui.reset.addEventListener('click', () => controller.set(DEFAULT_SETTINGS));
   ui.release.addEventListener('click', () => controller.release());
   render();
@@ -273,9 +279,10 @@ function createOtherRow(tab) {
       ui.others.hidden = ui.otherList.childElementCount === 0;
       return;
     }
-    const { volume, mono } = controller.settings;
+    const { volume, mono, night } = controller.settings;
     renderSlider(slider, volume);
-    value.textContent = `${volume}%${mono ? ' · M' : ''}`;
+    const flags = [mono && i18n('mono'), night && i18n('night')].filter(Boolean);
+    value.textContent = [`${volume}%`, ...flags].join(' · ');
   }
 
   bindSlider(slider, controller);
