@@ -1,8 +1,12 @@
 /**
- * Audio engine. Each controlled tab gets one small graph on a shared
- * AudioContext:
+ * Audio engine. Each controlled tab gets one small graph, and all of them meet
+ * in a shared limiter on one AudioContext:
  *
- *   tab stream -> gain (volume) -> mixer (stereo | mono) -> speakers
+ *   tab stream -> gain (volume) -> mixer (stereo | mono) ─┐
+ *   tab stream -> gain (volume) -> mixer (stereo | mono) ─┴-> limiter -> speakers
+ *
+ * The limiter keeps boosted audio (and the sum of several tabs) from clipping;
+ * below the ceiling it passes audio through untouched.
  *
  * Capturing a tab silences its own output, so the graph must always reach the
  * speakers. Releasing a tab stops its tracks, which is what makes Chrome drop
@@ -26,19 +30,34 @@ import { Msg, Target, listen, send } from '../shared/protocol.js';
  * @property {Settings} settings
  */
 
+/**
+ * @typedef {object} Engine
+ * @property {AudioContext} context
+ * @property {AudioWorkletNode} limiter
+ */
+
 /** Time constant for volume changes: feels instant, but doesn't click. */
 const SMOOTHING_SECONDS = 0.015;
 
-/** @type {AudioContext | null} */
-let context = null;
+/** @type {Promise<Engine> | null} */
+let engine = null;
+
+/** Whether the limiter is currently holding the output down. */
+let limiting = false;
 
 /** @type {Map<number, Channel>} */
 const channels = new Map();
 
+/** Captures still being set up; the engine must not close under them. */
+let pendingCaptures = 0;
+
 listen(Target.OFFSCREEN, async (message) => {
   switch (message.type) {
     case Msg.GET_STATE:
-      return { tabs: [...channels].map(([tabId, channel]) => describe(tabId, channel)) };
+      return {
+        tabs: [...channels].map(([tabId, channel]) => describe(tabId, channel)),
+        limiting,
+      };
     case Msg.CAPTURE:
       await capture(message.tabId, message.streamId, message.settings, message.meta);
       return { ok: true };
@@ -52,6 +71,32 @@ listen(Target.OFFSCREEN, async (message) => {
   }
 });
 
+/** @returns {Promise<Engine>} */
+function getEngine() {
+  engine ??= createEngine();
+  return engine;
+}
+
+async function createEngine() {
+  const context = new AudioContext({ latencyHint: 'interactive' });
+  await context.audioWorklet.addModule('limiter-processor.js');
+  const limiter = new AudioWorkletNode(context, 'sotto-limiter', {
+    outputChannelCount: [2],
+    channelCount: 2,
+    channelCountMode: 'explicit',
+  });
+  limiter.port.onmessage = (event) => (limiting = event.data.limiting);
+  limiter.connect(context.destination);
+  return { context, limiter };
+}
+
+async function closeEngine() {
+  const closing = engine;
+  engine = null;
+  limiting = false;
+  if (closing) await (await closing).context.close();
+}
+
 /**
  * @param {number} tabId
  * @param {string} streamId
@@ -64,23 +109,36 @@ async function capture(tabId, streamId, settings, meta) {
     return;
   }
 
-  /** @type {any} Chrome-specific constraints, not in the standard typings. */
-  const audio = { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } };
-  const stream = await navigator.mediaDevices.getUserMedia({ audio, video: false });
+  pendingCaptures++;
+  /** @type {MediaStream | undefined} */
+  let stream;
+  try {
+    /** @type {any} Chrome-specific constraints, not in the standard typings. */
+    const audio = { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } };
+    stream = await navigator.mediaDevices.getUserMedia({ audio, video: false });
 
-  context ??= new AudioContext({ latencyHint: 'interactive' });
-  const source = context.createMediaStreamSource(stream);
-  const gain = context.createGain();
-  const mixer = context.createGain();
-  source.connect(gain).connect(mixer).connect(context.destination);
+    const { context, limiter } = await getEngine();
+    const source = context.createMediaStreamSource(stream);
+    const gain = context.createGain();
+    const mixer = context.createGain();
+    source.connect(gain).connect(mixer).connect(limiter);
+    channels.set(tabId, { stream, source, gain, mixer, meta, settings });
+    apply(tabId, settings);
 
-  channels.set(tabId, { stream, source, gain, mixer, meta, settings });
-  apply(tabId, settings);
-
-  for (const track of stream.getAudioTracks()) {
-    track.addEventListener('ended', () => onEnded(tabId), { once: true });
+    for (const track of stream.getAudioTracks()) {
+      track.addEventListener('ended', () => onEnded(tabId), { once: true });
+    }
+    if (context.state === 'suspended') await context.resume();
+  } catch (error) {
+    // Never leave a half-set-up capture behind: it would keep the tab muted
+    // and the sharing indicator on.
+    if (channels.has(tabId)) release(tabId);
+    else for (const track of stream?.getTracks() ?? []) track.stop();
+    throw error;
+  } finally {
+    pendingCaptures--;
+    if (channels.size === 0 && pendingCaptures === 0) void closeEngine();
   }
-  if (context.state === 'suspended') await context.resume();
 }
 
 /**
@@ -90,12 +148,13 @@ async function capture(tabId, streamId, settings, meta) {
  */
 function apply(tabId, settings) {
   const channel = channels.get(tabId);
-  if (!channel || !context) return false;
+  if (!channel) return false;
 
-  channel.gain.gain.setTargetAtTime(settings.volume / 100, context.currentTime, SMOOTHING_SECONDS);
+  const { currentTime } = channel.gain.context;
+  channel.gain.gain.setTargetAtTime(settings.volume / 100, currentTime, SMOOTHING_SECONDS);
 
   // Mono: force one channel with "speakers" downmix, i.e. (L + R) / 2. The
-  // destination upmixes it back to stereo, so both ears hear everything.
+  // limiter's input upmixes it back to stereo, so both ears hear everything.
   channel.mixer.channelCount = settings.mono ? 1 : 2;
   channel.mixer.channelCountMode = settings.mono ? 'explicit' : 'max';
 
@@ -114,10 +173,7 @@ function release(tabId) {
   channel.mixer.disconnect();
   for (const track of channel.stream.getTracks()) track.stop();
 
-  if (channels.size === 0 && context) {
-    context.close();
-    context = null;
-  }
+  if (channels.size === 0 && pendingCaptures === 0) void closeEngine();
 }
 
 /** @param {number} tabId */

@@ -11,6 +11,12 @@
   "volume": {
     "message": "Ses düzeyi"
   },
+  "limiter": {
+    "message": "Sınırlayıcı"
+  },
+  "limiterHint": {
+    "message": "Yükseltilen sesin patlamasını önler. Yanarken daha fazla açmak sesi yükseltmez, yalnızca sıkıştırır."
+  },
   "statusIdle": {
     "message": "Dokunulmadı"
   },

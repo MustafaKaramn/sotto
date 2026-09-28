@@ -12,7 +12,11 @@ export default [
     },
   },
   {
-    files: ['scripts/**/*.mjs', 'eslint.config.js'],
+    files: ['src/offscreen/limiter-processor.js'],
+    languageOptions: { globals: globals.audioWorklet },
+  },
+  {
+    files: ['scripts/**/*.mjs', 'tests/**/*.mjs', 'eslint.config.js'],
     languageOptions: { globals: globals.node },
   },
 ];

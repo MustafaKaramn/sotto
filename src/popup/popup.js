@@ -5,9 +5,26 @@ import { DEFAULT_SETTINGS, Msg, Target, Volume, send } from '../shared/protocol.
  * @typedef {import('../shared/protocol.js').ControlledTab} ControlledTab
  */
 
+/**
+ * The slider is two linear zones: the left half is 0–100%, the right half the
+ * boost range up to Volume.MAX, so everyday levels keep their precision.
+ */
+const UNITY_POSITION = 0.5;
+const SLIDER_STEPS = 1000;
 /** Pointer drags that land this close to 100% snap onto it. */
 const SNAP_DISTANCE = 4;
 const WHEEL_STEP = 5;
+/** Volume steps for keys on a focused slider. */
+const KEY_STEPS = /** @type {Record<string, number>} */ ({
+  ArrowUp: 1,
+  ArrowRight: 1,
+  ArrowDown: -1,
+  ArrowLeft: -1,
+  PageUp: 10,
+  PageDown: -10,
+});
+/** How often the popup asks whether the limiter is working, in ms. */
+const LIMITER_POLL_MS = 300;
 /** Pages whose audio the browser lets extensions capture. */
 const CAPTURABLE_URL = /^(https?|file):/;
 
@@ -90,6 +107,7 @@ const ui = {
   title: /** @type {HTMLElement} */ (document.getElementById('tab-title')),
   status: /** @type {HTMLElement} */ (document.getElementById('status')),
   readout: /** @type {HTMLElement} */ (document.getElementById('readout')),
+  limiter: /** @type {HTMLElement} */ (document.getElementById('limiter')),
   value: /** @type {HTMLOutputElement} */ (document.getElementById('volume-value')),
   volume: /** @type {HTMLInputElement} */ (document.getElementById('volume')),
   mono: /** @type {HTMLButtonElement} */ (document.getElementById('mono')),
@@ -109,17 +127,34 @@ main().catch((error) => {
 async function main() {
   localize(document);
   document.documentElement.lang = chrome.i18n.getUILanguage();
-  document.documentElement.style.setProperty('--unity', String(Volume.DEFAULT / Volume.MAX));
+  document.documentElement.style.setProperty('--unity', String(UNITY_POSITION));
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  /** @type {{ tabs: ControlledTab[] }} */
-  const { tabs } = await send(Target.BACKGROUND, Msg.GET_STATE);
+  /** @type {{ tabs: ControlledTab[], limiting: boolean }} */
+  const { tabs, limiting } = await send(Target.BACKGROUND, Msg.GET_STATE);
 
   setUpCurrentTab(
     tab,
     tabs.find((controlled) => controlled.tabId === tab.id),
   );
   setUpOtherTabs(tabs.filter((controlled) => controlled.tabId !== tab.id));
+  showLimiting(limiting);
+  setInterval(pollLimiter, LIMITER_POLL_MS);
+}
+
+async function pollLimiter() {
+  if (ui.limiter.hidden) return;
+  try {
+    const { limiting } = await send(Target.BACKGROUND, Msg.GET_STATE);
+    showLimiting(limiting);
+  } catch {
+    showLimiting(false);
+  }
+}
+
+/** @param {boolean} limiting */
+function showLimiting(limiting) {
+  ui.limiter.toggleAttribute('data-active', limiting);
 }
 
 /**
@@ -152,6 +187,7 @@ function setUpCurrentTab(tab, controlled) {
     renderSlider(ui.volume, volume);
     ui.value.textContent = String(volume);
     ui.readout.toggleAttribute('data-boost', volume > Volume.DEFAULT);
+    ui.limiter.hidden = !controller.engaged || volume <= Volume.DEFAULT;
     ui.mono.setAttribute('aria-pressed', String(mono));
     ui.reset.disabled = !controller.engaged || isDefault(controller.settings);
     ui.release.disabled = !controller.engaged;
@@ -215,8 +251,8 @@ function createOtherRow(tab) {
 
 /** @param {HTMLInputElement} slider */
 function setUpSlider(slider) {
-  slider.min = String(Volume.MIN);
-  slider.max = String(Volume.MAX);
+  slider.min = '0';
+  slider.max = String(SLIDER_STEPS);
   slider.step = '1';
 }
 
@@ -230,9 +266,21 @@ function bindSlider(slider, controller) {
   slider.addEventListener('change', () => (dragging = false));
 
   slider.addEventListener('input', () => {
-    let volume = Number(slider.value);
+    let volume = positionToVolume(Number(slider.value) / SLIDER_STEPS);
     if (dragging && Math.abs(volume - Volume.DEFAULT) <= SNAP_DISTANCE) volume = Volume.DEFAULT;
     controller.set({ volume });
+  });
+
+  // The native key steps would be fractions of a percent; use whole percents.
+  slider.addEventListener('keydown', (event) => {
+    const { volume } = controller.settings;
+    let next;
+    if (event.key in KEY_STEPS) next = volume + KEY_STEPS[event.key];
+    else if (event.key === 'Home') next = Volume.MIN;
+    else if (event.key === 'End') next = Volume.MAX;
+    else return;
+    event.preventDefault();
+    controller.set({ volume: clampVolume(next) });
   });
 
   slider.addEventListener(
@@ -242,7 +290,7 @@ function bindSlider(slider, controller) {
       event.preventDefault();
       const step = event.deltaY < 0 ? WHEEL_STEP : -WHEEL_STEP;
       const volume = Math.round((controller.settings.volume + step) / WHEEL_STEP) * WHEEL_STEP;
-      controller.set({ volume: Math.min(Volume.MAX, Math.max(Volume.MIN, volume)) });
+      controller.set({ volume: clampVolume(volume) });
     },
     { passive: false },
   );
@@ -253,8 +301,40 @@ function bindSlider(slider, controller) {
  * @param {number} volume
  */
 function renderSlider(slider, volume) {
-  slider.value = String(volume);
-  slider.style.setProperty('--fill', String((volume - Volume.MIN) / (Volume.MAX - Volume.MIN)));
+  const position = volumeToPosition(volume);
+  slider.value = String(Math.round(position * SLIDER_STEPS));
+  slider.style.setProperty('--fill', String(position));
+  slider.setAttribute('aria-valuetext', `${volume}%`);
+}
+
+/**
+ * @param {number} volume
+ * @returns {number} Slider position, 0..1.
+ */
+function volumeToPosition(volume) {
+  if (volume <= Volume.DEFAULT) {
+    return ((volume - Volume.MIN) / (Volume.DEFAULT - Volume.MIN)) * UNITY_POSITION;
+  }
+  const boost = (volume - Volume.DEFAULT) / (Volume.MAX - Volume.DEFAULT);
+  return UNITY_POSITION + boost * (1 - UNITY_POSITION);
+}
+
+/**
+ * @param {number} position Slider position, 0..1.
+ * @returns {number} Volume in whole percents.
+ */
+function positionToVolume(position) {
+  const volume =
+    position <= UNITY_POSITION
+      ? Volume.MIN + (position / UNITY_POSITION) * (Volume.DEFAULT - Volume.MIN)
+      : Volume.DEFAULT +
+        ((position - UNITY_POSITION) / (1 - UNITY_POSITION)) * (Volume.MAX - Volume.DEFAULT);
+  return Math.round(volume);
+}
+
+/** @param {number} volume */
+function clampVolume(volume) {
+  return Math.min(Volume.MAX, Math.max(Volume.MIN, volume));
 }
 
 /** @param {Settings} settings */

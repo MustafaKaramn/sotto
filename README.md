@@ -10,7 +10,8 @@
 
 ## Features
 
-- **Volume slider per tab**: 0–300%. Anything above 100% is boost and the slider shows it in a different color. Drags snap to 100%, and the mouse wheel moves it in steps of 5.
+- **Volume slider per tab**: 0–500%. The left half of the slider covers 0–100% and the right half is boost, shown in a different color. Drags snap to 100%. The mouse wheel moves it in steps of 5, and the arrow keys in steps of 1.
+- **Clean boost**: a look-ahead limiter keeps boosted audio from clipping or crackling. Below the clipping point it leaves the audio untouched. A **Limiter** badge lights up while it's working.
 - **Mono**: plays both channels in both ears. Useful for videos whose sound comes from one side only.
 - **Reset**: back to 100%, stereo.
 - **Release**: stops controlling the tab completely. The capture ends, Chrome's "sharing this tab" indicator goes away, and the tab plays exactly as it did before.
@@ -28,13 +29,15 @@
 
 ```
 popup ──► service worker ──► offscreen document (audio engine)
-            │                   tab stream → gain (volume) → mixer (stereo | mono) → speakers
+            │                   tab stream → gain (volume) → mixer (stereo | mono) ─┐
+            │                   tab stream → gain (volume) → mixer (stereo | mono) ─┴─► limiter → speakers
             └─ chrome.tabCapture.getMediaStreamId
 ```
 
 - [`src/popup/`](src/popup): the UI. Updates are optimistic and coalesced, so fast slider drags send at most one request per tab at a time.
 - [`src/background/service-worker.js`](src/background/service-worker.js): the coordinator. It captures tabs, creates the offscreen document on demand, closes it when nothing is controlled, and sets the toolbar badge.
-- [`src/offscreen/`](src/offscreen): the audio engine. One Web Audio graph per tab on a shared `AudioContext`.
+- [`src/offscreen/`](src/offscreen): the audio engine. One Web Audio graph per tab on a shared `AudioContext`, all feeding one limiter.
+- [`src/offscreen/limiter.js`](src/offscreen/limiter.js): the limiter's DSP. It's plain code with no Web Audio dependency, so [`tests/`](tests) can check it in Node. The tests confirm that no sample exceeds the ceiling at 500%, that audio below the ceiling passes through bit-exact, and that the limiter costs about 0.2% of real time.
 - [`src/shared/protocol.js`](src/shared/protocol.js): message types, shared constants and messaging helpers.
 
 Sotto uses `chrome.tabCapture` because it is the only approach that handles **all** audio in a tab: `<video>`, Web Audio, cross-origin iframes. It also allows boost and mono. The trade-off is that Chrome shows its tab-sharing indicator **while a tab is being controlled**. Chrome shows that indicator for every tab capture as a security measure, and extensions can't hide it. What Sotto guarantees is that the indicator goes away the moment you press **Release**.
@@ -59,14 +62,15 @@ Load the extension:
 
 To debug, right-click the popup and choose _Inspect_. The service worker and the offscreen document both have _Inspect views_ links on the extension card.
 
-| Script              | What it does                                                            |
-| ------------------- | ----------------------------------------------------------------------- |
-| `npm run check`     | Runs lint, type checks and the formatting check (run before committing) |
-| `npm run lint`      | Runs ESLint                                                             |
-| `npm run typecheck` | Type-checks the JSDoc-annotated JS with `tsc`                           |
-| `npm run format`    | Formats everything with Prettier                                        |
-| `npm run icons`     | Regenerates `src/icons/*.png` from code                                 |
-| `npm run pack`      | Builds `dist/sotto-<version>.zip` for store upload                      |
+| Script              | What it does                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `npm run check`     | Runs lint, type checks, the formatting check and the tests (run before committing) |
+| `npm test`          | Runs the unit tests                                                                |
+| `npm run lint`      | Runs ESLint                                                                        |
+| `npm run typecheck` | Type-checks the JSDoc-annotated JS with `tsc`                                      |
+| `npm run format`    | Formats everything with Prettier                                                   |
+| `npm run icons`     | Regenerates `src/icons/*.png` from code                                            |
+| `npm run pack`      | Builds `dist/sotto-<version>.zip` for store upload                                 |
 
 The version lives in both `src/manifest.json` and `package.json`. `npm run pack` refuses to build if the two differ.
 

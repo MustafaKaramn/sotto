@@ -27,7 +27,7 @@ export const Msg = Object.freeze({
 /** Volume is expressed in percent; above 100 is boost. */
 export const Volume = Object.freeze({
   MIN: 0,
-  MAX: 300,
+  MAX: 500,
   DEFAULT: 100,
 });
 

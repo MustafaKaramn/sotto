@@ -14,6 +14,12 @@
   "volume": {
     "message": "Volume"
   },
+  "limiter": {
+    "message": "Limiter"
+  },
+  "limiterHint": {
+    "message": "Keeps boosted sound from distorting. While it's lit, turning up further compresses the sound instead of making it louder."
+  },
   "statusIdle": {
     "message": "Untouched",
     "description": "The extension is not doing anything to this tab."

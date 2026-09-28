@@ -156,6 +156,37 @@ svg {
   font-size: 16px;
 }
 
+.readout {
+  position: relative;
+}
+
+/* Lights up while the limiter holds boosted audio below the clipping point. */
+.limiter {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform: translateY(-50%);
+  cursor: help;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.limiter[data-active] {
+  border-color: var(--boost);
+  background: color-mix(in srgb, var(--boost) 15%, transparent);
+  color: var(--boost);
+}
+
 /* Slider ------------------------------------------------------------------ */
 
 .slider-wrap {

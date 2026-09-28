@@ -40,7 +40,7 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 });
 
 async function getState() {
-  if (!(await hasOffscreenDocument())) return { tabs: [] };
+  if (!(await hasOffscreenDocument())) return { tabs: [], limiting: false };
   return send(Target.OFFSCREEN, Msg.GET_STATE);
 }
 
@@ -65,7 +65,15 @@ function captureOnce(tabId, settings) {
   const inFlight = pendingCaptures.get(tabId);
   if (inFlight) return inFlight.then(() => send(Target.OFFSCREEN, Msg.APPLY, { tabId, settings }));
 
-  const capture = startCapture(tabId, settings).finally(() => pendingCaptures.delete(tabId));
+  const capture = startCapture(tabId, settings)
+    .finally(() => pendingCaptures.delete(tabId))
+    .catch(async (error) => {
+      // Clean up after a failed capture, e.g. close an offscreen document
+      // that was opened just for it.
+      const { tabs } = await getState();
+      await afterRelease(tabId, tabs.length);
+      throw error;
+    });
   pendingCaptures.set(tabId, capture);
   return capture;
 }
@@ -78,18 +86,12 @@ async function startCapture(tabId, settings) {
   const tab = await chrome.tabs.get(tabId);
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
   await ensureOffscreenDocument();
-  try {
-    await send(Target.OFFSCREEN, Msg.CAPTURE, {
-      tabId,
-      streamId,
-      settings,
-      meta: { title: tab.title ?? '', favIconUrl: tab.favIconUrl ?? '' },
-    });
-  } catch (error) {
-    const { tabs } = await send(Target.OFFSCREEN, Msg.GET_STATE);
-    await afterRelease(tabId, tabs.length);
-    throw error;
-  }
+  await send(Target.OFFSCREEN, Msg.CAPTURE, {
+    tabId,
+    streamId,
+    settings,
+    meta: { title: tab.title ?? '', favIconUrl: tab.favIconUrl ?? '' },
+  });
 }
 
 /** @param {number} tabId */
@@ -105,7 +107,7 @@ async function release(tabId) {
  */
 async function afterRelease(tabId, remaining) {
   await chrome.action.setBadgeText({ tabId, text: '' }).catch(() => {});
-  if (remaining === 0) await closeOffscreenDocument();
+  if (remaining === 0 && pendingCaptures.size === 0) await closeOffscreenDocument();
   return { ok: true };
 }
 
