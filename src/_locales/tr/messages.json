@@ -35,6 +35,21 @@
   "nightHint": {
     "message": "Gece modu: patlamaları bastırır, diyaloğu öne çıkarır"
   },
+  "balance": {
+    "message": "Denge"
+  },
+  "balanceHint": {
+    "message": "Sol/sağ denge. Ortalamak için çift tıklayın."
+  },
+  "left": {
+    "message": "Sol"
+  },
+  "right": {
+    "message": "Sağ"
+  },
+  "balanceCenter": {
+    "message": "Orta"
+  },
   "reset": {
     "message": "Sıfırla"
   },

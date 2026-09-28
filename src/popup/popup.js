@@ -1,4 +1,5 @@
 import {
+  Balance,
   DEFAULT_SETTINGS,
   Msg,
   Target,
@@ -34,6 +35,8 @@ const KEY_STEPS = /** @type {Record<string, number>} */ ({
 });
 /** How often the popup asks whether the limiter is working, in ms. */
 const LIMITER_POLL_MS = 300;
+/** Balance drags this close to the centre snap onto it. */
+const BALANCE_SNAP = 6;
 /** Pages whose audio the browser lets extensions capture. */
 const CAPTURABLE_URL = /^(https?|file):/;
 
@@ -121,6 +124,7 @@ const ui = {
   volume: /** @type {HTMLInputElement} */ (document.getElementById('volume')),
   mono: /** @type {HTMLButtonElement} */ (document.getElementById('mono')),
   night: /** @type {HTMLButtonElement} */ (document.getElementById('night')),
+  balance: /** @type {HTMLInputElement} */ (document.getElementById('balance')),
   reset: /** @type {HTMLButtonElement} */ (document.getElementById('reset')),
   release: /** @type {HTMLButtonElement} */ (document.getElementById('release')),
   notice: /** @type {HTMLElement} */ (document.getElementById('notice')),
@@ -205,11 +209,12 @@ function setUpCurrentTab(tab, controlled) {
   setUpSlider(ui.volume);
 
   if (tab.id === undefined || !CAPTURABLE_URL.test(tab.url ?? '')) {
-    for (const control of [ui.volume, ui.mono, ui.night, ui.reset, ui.release]) {
+    for (const control of [ui.volume, ui.mono, ui.night, ui.balance, ui.reset, ui.release]) {
       control.disabled = true;
     }
     ui.status.textContent = i18n('statusIdle');
     renderSlider(ui.volume, Volume.DEFAULT);
+    renderBalance(ui.balance, Balance.CENTER);
     showNotice(i18n('noticeRestricted'));
     return;
   }
@@ -223,8 +228,9 @@ function setUpCurrentTab(tab, controlled) {
   });
 
   function render() {
-    const { volume, mono, night } = controller.settings;
+    const { volume, mono, night, balance } = controller.settings;
     renderSlider(ui.volume, volume);
+    renderBalance(ui.balance, balance);
     ui.value.textContent = String(volume);
     ui.readout.toggleAttribute('data-boost', volume > Volume.DEFAULT);
     ui.limiter.hidden = !controller.engaged || volume <= Volume.DEFAULT;
@@ -239,6 +245,7 @@ function setUpCurrentTab(tab, controlled) {
   bindSlider(ui.volume, controller);
   ui.mono.addEventListener('click', () => controller.set({ mono: !controller.settings.mono }));
   ui.night.addEventListener('click', () => controller.set({ night: !controller.settings.night }));
+  bindBalance(ui.balance, controller);
   ui.reset.addEventListener('click', () => controller.set(DEFAULT_SETTINGS));
   ui.release.addEventListener('click', () => controller.release());
   render();
@@ -279,9 +286,13 @@ function createOtherRow(tab) {
       ui.others.hidden = ui.otherList.childElementCount === 0;
       return;
     }
-    const { volume, mono, night } = controller.settings;
+    const { volume, mono, night, balance } = controller.settings;
     renderSlider(slider, volume);
-    const flags = [mono && i18n('mono'), night && i18n('night')].filter(Boolean);
+    const flags = [
+      mono && i18n('mono'),
+      night && i18n('night'),
+      balance !== Balance.CENTER && describeBalance(balance),
+    ].filter(Boolean);
     value.textContent = [`${volume}%`, ...flags].join(' · ');
   }
 
@@ -337,6 +348,53 @@ function bindSlider(slider, controller) {
     },
     { passive: false },
   );
+}
+
+/**
+ * @param {HTMLInputElement} slider
+ * @param {TabController} controller
+ */
+function bindBalance(slider, controller) {
+  slider.min = String(Balance.MIN);
+  slider.max = String(Balance.MAX);
+  slider.step = '1';
+
+  let dragging = false;
+  slider.addEventListener('pointerdown', () => (dragging = true));
+  slider.addEventListener('change', () => (dragging = false));
+  slider.addEventListener('input', () => {
+    let balance = Number(slider.value);
+    if (dragging && Math.abs(balance - Balance.CENTER) <= BALANCE_SNAP) balance = Balance.CENTER;
+    controller.set({ balance });
+  });
+  slider.addEventListener('dblclick', () => controller.set({ balance: Balance.CENTER }));
+  slider.addEventListener(
+    'wheel',
+    (event) => {
+      if (slider.disabled) return;
+      event.preventDefault();
+      const step = event.deltaY < 0 ? WHEEL_STEP : -WHEEL_STEP;
+      const balance = controller.settings.balance + step;
+      controller.set({ balance: Math.min(Balance.MAX, Math.max(Balance.MIN, balance)) });
+    },
+    { passive: false },
+  );
+}
+
+/**
+ * @param {HTMLInputElement} slider
+ * @param {number} balance
+ */
+function renderBalance(slider, balance) {
+  slider.value = String(balance);
+  slider.style.setProperty('--fill', String((balance - Balance.MIN) / (Balance.MAX - Balance.MIN)));
+  slider.setAttribute('aria-valuetext', describeBalance(balance));
+}
+
+/** @param {number} balance */
+function describeBalance(balance) {
+  if (balance === Balance.CENTER) return i18n('balanceCenter');
+  return `${i18n(balance < 0 ? 'left' : 'right')} ${Math.abs(balance)}`;
 }
 
 /**

@@ -31,11 +31,19 @@ export const Volume = Object.freeze({
   DEFAULT: 100,
 });
 
+/** Left/right balance; negative leans left (the right side is turned down). */
+export const Balance = Object.freeze({
+  MIN: -100,
+  MAX: 100,
+  CENTER: 0,
+});
+
 /** @type {Readonly<Settings>} */
 export const DEFAULT_SETTINGS = Object.freeze({
   volume: Volume.DEFAULT,
   mono: false,
   night: false,
+  balance: Balance.CENTER,
 });
 
 /**
@@ -44,7 +52,12 @@ export const DEFAULT_SETTINGS = Object.freeze({
  * @returns {Settings}
  */
 export function toSettings(source) {
-  return { volume: source.volume, mono: source.mono, night: source.night };
+  return {
+    volume: source.volume,
+    mono: source.mono,
+    night: source.night,
+    balance: source.balance,
+  };
 }
 
 /** @param {Settings} settings */
@@ -52,7 +65,8 @@ export function isDefault(settings) {
   return (
     settings.volume === DEFAULT_SETTINGS.volume &&
     settings.mono === DEFAULT_SETTINGS.mono &&
-    settings.night === DEFAULT_SETTINGS.night
+    settings.night === DEFAULT_SETTINGS.night &&
+    settings.balance === DEFAULT_SETTINGS.balance
   );
 }
 
@@ -66,6 +80,7 @@ export function clampVolume(volume) {
  * @property {number} volume Percent, `Volume.MIN`..`Volume.MAX`.
  * @property {boolean} mono Downmix to a single channel played in both ears.
  * @property {boolean} night Night mode: tame loud effects, bring dialogue forward.
+ * @property {number} balance -100 (left only) .. 0 (centre) .. 100 (right only).
  */
 
 /**

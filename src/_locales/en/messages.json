@@ -40,6 +40,21 @@
   "nightHint": {
     "message": "Night mode: tames loud effects and brings dialogue forward"
   },
+  "balance": {
+    "message": "Balance"
+  },
+  "balanceHint": {
+    "message": "Left/right balance. Double-click to centre."
+  },
+  "left": {
+    "message": "L"
+  },
+  "right": {
+    "message": "R"
+  },
+  "balanceCenter": {
+    "message": "Centre"
+  },
   "reset": {
     "message": "Reset"
   },

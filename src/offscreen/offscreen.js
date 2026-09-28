@@ -2,8 +2,8 @@
  * Audio engine. Each controlled tab gets one small graph, and all of them meet
  * in a shared limiter on one AudioContext:
  *
- *   tab stream -> gain (volume) -> [night mode] -> mixer (stereo | mono) ─┐
- *   tab stream -> gain (volume) -> [night mode] -> mixer (stereo | mono) ─┴-> limiter -> speakers
+ *   tab stream -> gain (volume) -> [night mode] -> mixer (stereo | mono) -> balance ─┐
+ *   tab stream -> gain (volume) -> [night mode] -> mixer (stereo | mono) -> balance ─┴-> limiter -> speakers
  *
  * The limiter keeps boosted audio (and the sum of several tabs) from clipping;
  * below the ceiling it passes audio through untouched.
@@ -13,6 +13,7 @@
  * the "tab is being shared" indicator; the tab then plays on its own again.
  */
 import { Msg, Target, listen, send, toSettings } from '../shared/protocol.js';
+import { balanceGains, createBalanceStage } from './balance.js';
 import { createNightChain } from './night-mode.js';
 
 /**
@@ -20,6 +21,7 @@ import { createNightChain } from './night-mode.js';
  * @typedef {import('../shared/protocol.js').TabMeta} TabMeta
  * @typedef {import('../shared/protocol.js').ControlledTab} ControlledTab
  * @typedef {import('./night-mode.js').NightChain} NightChain
+ * @typedef {import('./balance.js').BalanceStage} BalanceStage
  */
 
 /**
@@ -28,6 +30,7 @@ import { createNightChain } from './night-mode.js';
  * @property {MediaStreamAudioSourceNode} source
  * @property {GainNode} gain
  * @property {GainNode} mixer
+ * @property {BalanceStage} balance
  * @property {NightChain | null} night Created the first time night mode is used.
  * @property {boolean} nightWired Whether the night chain is currently in the path.
  * @property {boolean} rewiring
@@ -129,14 +132,17 @@ async function capture(tabId, streamId, settings, meta) {
     const source = context.createMediaStreamSource(stream);
     const gain = context.createGain();
     const mixer = context.createGain();
+    const balance = createBalanceStage(context);
     source.connect(gain);
-    mixer.connect(limiter);
+    mixer.connect(balance.input);
+    balance.output.connect(limiter);
     /** @type {Channel} */
     const channel = {
       stream,
       source,
       gain,
       mixer,
+      balance,
       night: null,
       nightWired: false,
       rewiring: false,
@@ -179,6 +185,10 @@ function apply(tabId, settings) {
   // limiter's input upmixes it back to stereo, so both ears hear everything.
   channel.mixer.channelCount = settings.mono ? 1 : 2;
   channel.mixer.channelCountMode = settings.mono ? 'explicit' : 'max';
+
+  const { left, right } = balanceGains(settings.balance);
+  channel.balance.left.gain.setTargetAtTime(left, currentTime, SMOOTHING_SECONDS);
+  channel.balance.right.gain.setTargetAtTime(right, currentTime, SMOOTHING_SECONDS);
 
   channel.settings = toSettings(settings);
   if (settings.night !== channel.nightWired) rewire(tabId, channel);
@@ -233,6 +243,7 @@ function release(tabId) {
   channel.gain.disconnect();
   for (const node of channel.night?.nodes ?? []) node.disconnect();
   channel.mixer.disconnect();
+  for (const node of channel.balance.nodes) node.disconnect();
   for (const track of channel.stream.getTracks()) track.stop();
 
   if (channels.size === 0 && pendingCaptures === 0) void closeEngine();

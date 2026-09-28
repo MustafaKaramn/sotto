@@ -272,6 +272,30 @@ svg {
   --track-size: 4px;
 }
 
+/* Balance: the fill runs from the centre to the thumb. */
+.slider--balance::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    var(--track) 0 min(var(--fill-x), var(--unity-x)),
+    var(--accent) min(var(--fill-x), var(--unity-x)) max(var(--fill-x), var(--unity-x)),
+    var(--track) max(var(--fill-x), var(--unity-x))
+  );
+}
+
+.balance {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.balance__side {
+  min-width: 2ch;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
 /* Buttons ----------------------------------------------------------------- */
 
 .actions {

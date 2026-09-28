@@ -13,8 +13,9 @@
 - **Volume slider per tab**: 0–500%. The left half of the slider covers 0–100% and the right half is boost, shown in a different color. Drags snap to 100%. The mouse wheel moves it in steps of 5, and the arrow keys in steps of 1.
 - **Clean boost**: a look-ahead limiter keeps boosted audio from clipping or crackling. Below the clipping point it leaves the audio untouched. A **Limiter** badge lights up while it's working.
 - **Mono**: plays both channels in both ears. Useful for videos whose sound comes from one side only.
+- **Balance**: turns the left or right side down, for example for uneven hearing or a single earbud. Unlike a panner, it never moves one side's content into the other. It works together with mono. Drags snap to the centre, and a double-click recentres it. At the centre, audio passes through bit-exact.
 - **Night mode**: tames loud effects and brings dialogue forward, for films where the voices are too quiet and the explosions too loud. It lowers the bass a little, lifts the speech range and narrows the dynamic range. Measured in Chrome, quiet speech comes up about 8 dB and full-scale hits drop about 8–10 dB. While it's off, none of its processing runs.
-- **Reset**: back to 100%, stereo, night mode off.
+- **Reset**: back to 100%, stereo, night mode off, balance centred.
 - **Release**: stops controlling the tab completely. The capture ends, Chrome's "sharing this tab" indicator goes away, and the tab plays exactly as it did before.
 - **Keyboard shortcuts** that work without opening the popup: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> change the volume by 10%, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> toggles mono, and <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd> releases the tab. Reset and night mode have no default keys but can be assigned. You can change all of them at `chrome://extensions/shortcuts`.
 - **All controlled tabs in one place**: every tab Sotto is controlling appears in the popup, with its own slider.
@@ -31,8 +32,8 @@
 
 ```
 popup ──► service worker ──► offscreen document (audio engine)
-            │                   tab stream → gain (volume) → mixer (stereo | mono) ─┐
-            │                   tab stream → gain (volume) → mixer (stereo | mono) ─┴─► limiter → speakers
+            │                   tab stream → gain → [night] → mixer (stereo | mono) → balance ─┐
+            │                   tab stream → gain → [night] → mixer (stereo | mono) → balance ─┴─► limiter → speakers
             └─ chrome.tabCapture.getMediaStreamId
 ```
 
