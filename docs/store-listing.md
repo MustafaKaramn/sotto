@@ -4,6 +4,10 @@ Ready-to-paste text for the Chrome Web Store (and Edge Add-ons) listing. The
 store shows plain text only, so paste the blocks as they are. Line breaks are
 kept, Markdown is not rendered.
 
+Don't list other browsers or product names in the description. Version 1.0.0
+was rejected as keyword spam (reference "Yellow Argon") for a line that named
+Chrome, Edge, Brave, Opera and Vivaldi.
+
 - **Category**: Tools ("Araçlar" in the Turkish dashboard). The category applies to all languages.
 - **Support URL**: https://github.com/MustafaKaramn/sotto/issues
 - **Language**: English as the default, with Turkish added as a second listing language
@@ -35,8 +39,6 @@ Chrome shows "Read and change all your data on all websites" for any extension t
 OPEN SOURCE
 Sotto is free and open source (GPL-3.0), so you can check all of the above yourself:
 https://github.com/MustafaKaramn/sotto
-
-Works in Chrome, Edge, Brave, Opera, Vivaldi and other Chromium browsers (version 116 or later).
 ```
 
 ## Türkçe
@@ -64,6 +66,4 @@ Chrome, bir sekmenin sesini yakalayabilen her eklenti için "Tüm web sitelerind
 AÇIK KAYNAK
 Sotto ücretsiz ve açık kaynaklıdır (GPL-3.0). Yukarıdakilerin hepsini kendiniz doğrulayabilirsiniz:
 https://github.com/MustafaKaramn/sotto
-
-Chrome, Edge, Brave, Opera, Vivaldi ve diğer Chromium tarayıcılarında çalışır (sürüm 116 ve üstü).
 ```
