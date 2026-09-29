@@ -4,9 +4,10 @@ Ready-to-paste text for the Chrome Web Store (and Edge Add-ons) listing. The
 store shows plain text only, so paste the blocks as they are. Line breaks are
 kept, Markdown is not rendered.
 
-- **Category**: Make Chrome Yours → Functionality & UI
+- **Category**: Tools ("Araçlar" in the Turkish dashboard). The category applies to all languages.
+- **Support URL**: https://github.com/MustafaKaramn/sotto/issues
 - **Language**: English as the default, with Turkish added as a second listing language
-- **Homepage / support URL**: https://github.com/MustafaKaramn/sotto
+- **Homepage URL**: https://github.com/MustafaKaramn/sotto
 - **Privacy policy URL**: https://github.com/MustafaKaramn/sotto/blob/main/PRIVACY.md
 
 ## English
