@@ -91,7 +91,7 @@ Sotto doesn't request host permissions and doesn't inject scripts into pages.
 
 ## Publishing
 
-See [docs/publishing.md](docs/publishing.md).
+See [docs/publishing.md](docs/publishing.md) for the release checklist and store setup, and [docs/store-listing.md](docs/store-listing.md) for the listing text.
 
 ## License
 
