@@ -8,7 +8,6 @@
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/okidoacdfcfididhnajcbeeehpboojhj"><img src="https://img.shields.io/chrome-web-store/v/okidoacdfcfididhnajcbeeehpboojhj?label=Chrome%20Web%20Store&color=5b5bd6" alt="Chrome Web Store version" /></a>
-  <a href="https://chromewebstore.google.com/detail/okidoacdfcfididhnajcbeeehpboojhj"><img src="https://img.shields.io/chrome-web-store/users/okidoacdfcfididhnajcbeeehpboojhj?color=5b5bd6" alt="Chrome Web Store users" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-5b5bd6" alt="License: GPL-3.0" /></a>
 </p>
 
