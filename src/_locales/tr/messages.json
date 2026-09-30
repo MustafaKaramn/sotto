@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "Sotto – Sekme Ses Kontrolü"
+    "message": "Sotto – Ses Yükseltici ve Sekme Ses Kontrolü"
   },
   "extDescription": {
-    "message": "Sekme başına %500'e kadar temiz ses; mono, gece modu ve denge. İşiniz bitince sekmeye hiç dokunmamış gibi çekilir."
+    "message": "Ses yükseltici ve sekme başına ses kontrolü: %500'e kadar temiz ses, mono, gece modu ve denge. İşiniz bitince iz bırakmaz."
   },
   "actionTitle": {
     "message": "Sotto: sekme sesi"

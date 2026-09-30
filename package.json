@@ -1,6 +1,6 @@
 {
   "name": "sotto",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Per-tab volume control for Chromium browsers: volume, boost, mono, and a clean release.",
   "license": "GPL-3.0-or-later",

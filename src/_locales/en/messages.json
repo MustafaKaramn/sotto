@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "Sotto – Tab Volume Control",
+    "message": "Sotto – Volume Booster & Tab Volume Control",
     "description": "Extension name shown in the browser and the store."
   },
   "extDescription": {
-    "message": "Per-tab volume up to 500% without distortion, plus mono, night mode and balance. Leaves the tab untouched when you're done.",
+    "message": "Volume booster and per-tab volume control: up to 500% without distortion, plus mono, night mode and balance. Lets go when done.",
     "description": "Short description, max 132 characters."
   },
   "actionTitle": {
